@@ -1,1485 +1,798 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>arTchieve — 보관소</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Inter:wght@400;700&family=Aclonica&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg-primary: #11120D;
-  --bg-secondary: #565448;
-  --bg-card: #312B25;
-  --bg-input: #565448;
-  --bg-tab-active: #D8D0BD;
-  --text-primary: #F0E6D6;
-  --text-secondary: #A89882;
-  --text-muted: #6D6052;
-  --text-dark: #1A1612;
-  --accent-gold: #C8A55C;
-  --accent-yellow: #F9D894;
-  --border-subtle: rgba(255,255,255,0.06);
-  --border-light: rgba(255,255,255,0.08);
-  --border-dark: rgba(255,255,255,0.04);
-  --color-blue: #5A7A9A;
-  --color-blue-light: #A5C2E0;
-  --color-green: #9CDCC6;
-  --color-pink: #E28BAB;
-  --color-red: #B5606A;
-  --color-purple: #DBB6D7;
-  --color-orange: #D4764E;
-  --color-brown: #DDBA9F;
-  --color-olive: #A1AA85;
-  --color-lemon: #EEE79F;
-  --color-amber: #C8A55C;
-  --nav-height: 79px;
-  --header-height: 72px;
-}
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { 
+  Book, Clapperboard, Music, Palette, Tent, 
+  Drama, Search, Plus, User, 
+  Grid, List, ChevronLeft, X, Share2,
+  Globe, PieChart, Heart, Bookmark, MoreHorizontal,
+  Settings, Camera, LogOut, ArrowRight, UserPlus, Check
+} from 'lucide-react';
 
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html, body { 
-  width:100%; height:100%; 
-  background:#000; 
-  font-family:'Inter',sans-serif; 
-  overflow:hidden;
-  color:var(--text-primary);
-}
+/* ========================================
+  DESIGN TOKENS & ASSETS
+  ========================================
+*/
+const THEMES = {
+  classic: { bg: '#11120D', accent: '#565449', text: '#D8CFBC', highlight: '#FFFBF4' },
+  midnight: { bg: '#0F172A', accent: '#334155', text: '#E2E8F0', highlight: '#F8FAFC' },
+  forest: { bg: '#142715', accent: '#2F4F2F', text: '#E8F5E9', highlight: '#FFFFFF' }
+};
 
-/* App Container */
-.app {
-  position:relative;
-  width:100%; max-width:430px; height:100vh; height:100dvh;
-  margin:0 auto;
-  background:var(--bg-primary);
-  overflow:hidden;
-  display:flex; flex-direction:column;
-}
+const CATEGORIES = [
+  { id: 'cinema', name: '영화', icon: Clapperboard, prompt: '관람한 극장은 어디인가요?', color: '#5A7A9A' },
+  { id: 'theater', name: '연극', icon: Drama, prompt: '배우들의 연기는 어땠나요?', color: '#B5606A' },
+  { id: 'art', name: '회화', icon: Palette, prompt: '가장 오래 머문 그림은?', color: '#A1AA85' },
+  { id: 'dance', name: '무용', icon: User, prompt: '인상 깊었던 안무는?', color: '#DDBA9F' },
+  { id: 'arch', name: '건축', icon: Tent, prompt: '공간의 분위기는 어땠나요?', color: '#9CDCC6' },
+  { id: 'lit', name: '문학', icon: Book, prompt: '기억에 남는 문장은?', color: '#D4764E' },
+  { id: 'music', name: '음악', icon: Music, prompt: '이 곡을 듣기 좋은 시간대는?', color: '#EEE79F' },
+];
 
-/* Screens */
-.screen {
-  position:absolute; inset:0;
-  display:flex; flex-direction:column;
-  opacity:0; pointer-events:none;
-  transition: opacity 0.35s ease, transform 0.35s ease;
-  transform: translateX(30px);
-  background:var(--bg-primary);
-  z-index:1;
-}
-.screen.active {
-  opacity:1; pointer-events:all;
-  transform: translateX(0);
-  z-index:2;
-}
-.screen.slide-left {
-  transform: translateX(-30px);
-}
+const LEVEL_THRESHOLDS = [0, 5, 15, 30, 50, 80, 120]; // Books required for each level
 
-/* ========== SPLASH SCREEN ========== */
-#splash {
-  justify-content:center; align-items:center;
-  z-index:100;
-  cursor:pointer;
-}
-#splash .splash-content {
-  display:flex; flex-direction:column; align-items:center; gap:16px;
-  animation: fadeInUp 1s ease;
-}
-#splash .logo-icon {
-  width: 80px;
-  height: 80px;
-  filter: drop-shadow(0 0 40px rgba(200,165,92,0.3));
-  animation: float 3s ease-in-out infinite;
-}
-#splash .logo-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-#splash h1 {
-  font-family:'Noto Serif KR',serif;
-  font-size:35px; font-weight:700;
-  color:var(--text-primary);
-  letter-spacing:-1px;
-}
-#splash .tagline {
-  font-size:15px; color:var(--text-secondary);
-}
-#splash .tap-hint {
-  font-size:14px; color:var(--text-muted);
-  margin-top:40px;
-  animation: pulse 2s ease-in-out infinite;
-}
+const DEFAULT_COVER = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000";
 
-@keyframes float {
-  0%,100% { transform:translateY(0); }
-  50% { transform:translateY(-10px); }
-}
-@keyframes pulse {
-  0%,100% { opacity:0.4; }
-  50% { opacity:1; }
-}
-@keyframes fadeInUp {
-  from { opacity:0; transform:translateY(20px); }
-  to { opacity:1; transform:translateY(0); }
-}
+/* ========================================
+  MOCK DATA
+  ========================================
+*/
+const MOCK_USERS = {
+  'user_1': { name: '심야의 시네필', libName: '새벽의 영화관', books: [
+    { id: 101, title: '드라이브 마이 카', category: 'cinema', rating: 5, date: '2023-10-12', spineColor: '#9B2C2C', review: '침묵이 대사가 되는 순간들.' }
+  ]},
+  'user_2': { name: '미술관 옆 동물원', libName: '오후 3시의 갤러리', books: [
+    { id: 102, title: '에드워드 호퍼 전', category: 'art', rating: 4, date: '2023-11-05', spineColor: '#565449', review: '도시의 고독.' }
+  ]},
+  'user_3': { name: '베토벤의 귀', libName: '클래식 라운지', books: [
+    { id: 103, title: '조성진 리사이틀', category: 'music', rating: 5, date: '2024-01-15', spineColor: '#D69E2E', review: '완벽한 타건.' }
+  ]}
+};
 
-/* ========== LOGIN SCREEN ========== */
-#login {
-  justify-content:center; align-items:center;
-  padding:0 32px;
-}
-#login .login-logo {
-  width: 64px;
-  height: 64px;
-  margin-bottom:8px;
-  filter: drop-shadow(0 0 30px rgba(200,165,92,0.2));
-}
-#login .login-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-#login h2 {
-  font-family:'Aclonica',sans-serif;
-  font-size:26px; color:var(--text-primary);
-  margin-bottom:6px; text-align:center;
-}
-#login .login-sub {
-  font-size:14px; color:var(--text-secondary);
-  margin-bottom:36px;
-  text-align: center;
-}
-#login .input-group {
-  width:100%; display:flex; flex-direction:column; gap:12px;
-  margin-bottom:20px;
-}
-#login .input-group input {
-  width:100%; height:46px;
-  background:var(--bg-input);
-  border:1px solid var(--border-light);
-  border-radius:6px;
-  padding:0 16px;
-  font-size:14px; color:var(--text-primary);
-  outline:none;
-  font-family:'Inter',sans-serif;
-}
-#login .input-group input::placeholder { color:#D8D0BD; }
-#login .input-group input:focus { border-color:var(--accent-gold); }
-#login .btn-login {
-  width:100%; height:48px;
-  background:var(--accent-yellow);
-  border:none; border-radius:6px;
-  font-size:21px; font-weight:700;
-  color:var(--text-dark);
-  cursor:pointer;
-  font-family:'Inter',sans-serif;
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-#login .btn-login:active { transform:scale(0.97); }
-#login .signup-link {
-  margin-top:24px;
-  font-size:14px; color:var(--text-secondary);
-  cursor:pointer;
-  text-align: center;
-}
-#login .signup-link:hover { color:var(--text-primary); }
+/* ========================================
+  COMPONENTS
+  ========================================
+*/
 
-/* ========== MAIN HEADER ========== */
-.main-header {
-  background:var(--bg-secondary);
-  padding:12px 20px 0;
-  flex-shrink:0;
-  border-bottom:1px solid rgba(255,255,255,0.04);
-}
-.main-header .top-row {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:10px;
-}
-.main-header .profile-area {
-  display:flex; align-items:center; gap:10px;
-}
-.main-header .profile-pic {
-  width:40px; height:40px; border-radius:50%;
-  background:var(--bg-tab-active);
-  display:flex; align-items:center; justify-content:center;
-  overflow: hidden;
-}
-.main-header .profile-pic img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.main-header .profile-info h3 {
-  font-family:'Noto Serif KR',serif;
-  font-size:16px; font-weight:700;
-  color:var(--bg-tab-active);
-}
-.main-header .profile-info span {
-  font-size:11.5px; color:#968D78;
-}
-.main-header .header-actions {
-  display:flex; gap:8px;
-}
-.main-header .header-actions button {
-  width:34px; height:34px; border-radius:50%;
-  background:none; border:none; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  font-size:16px; color:var(--text-secondary);
-}
-.main-header .header-actions button:hover {
-  background:rgba(255,255,255,0.08);
-}
-.main-header .header-actions button svg {
-  width: 18px;
-  height: 18px;
-  fill: var(--text-secondary);
-}
-.main-header .header-actions .profile-btn {
-  background:#D9D9D9;
-}
-.main-header .header-actions .profile-btn svg {
-  fill: #333;
-}
+// 1. Login Screen
+const Login = ({ onLogin }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-/* Sub Tabs */
-.sub-tabs {
-  display:flex; height:28px; border-radius:0;
-  overflow:hidden;
-  gap:0;
-}
-.sub-tabs button {
-  flex:1; height:100%;
-  background:transparent;
-  border:1px solid rgba(255,255,255,0.06);
-  border-top:none;
-  font-size:12.5px; font-family:'Inter',sans-serif;
-  color:var(--text-muted);
-  cursor:pointer;
-  transition:all 0.2s;
-  font-weight:400;
-}
-.sub-tabs button.active {
-  background:var(--bg-tab-active);
-  color:#1A1612;
-  font-weight:700;
-  border-color:var(--bg-tab-active);
-}
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if(!email || !password) return alert('이메일과 비밀번호를 입력해주세요.');
+    
+    setIsLoading(true);
+    // Simulate API Call
+    setTimeout(() => {
+      onLogin({
+        id: 'me',
+        name: '예술 수집가',
+        libName: '나의 작은 보관소',
+        email,
+        theme: 'classic',
+        following: []
+      });
+    }, 1000);
+  };
 
-/* ========== MAIN CONTENT AREA ========== */
-.main-content {
-  flex:1; overflow-y:auto; overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;
-}
-.main-content::-webkit-scrollbar { display:none; }
-
-/* ========== BOOKSHELF VIEW ========== */
-.bookshelf-grid {
-  padding:16px 20px 80px;
-  display:grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap:8px;
-  position:relative;
-}
-.shelf-row {
-  grid-column: 1 / -1;
-  height:7px;
-  background:var(--text-muted);
-  border-radius:2px;
-  margin: 8px 0 2px;
-}
-.book-spine {
-  height:58px;
-  border-radius:3px;
-  cursor:pointer;
-  transition: transform 0.2s;
-  position:relative;
-  margin-bottom:2px;
-}
-.book-spine:hover { transform:scaleY(1.05); }
-.book-spine:active { transform:scaleY(0.95); }
-
-/* Book colors */
-.bc-blue { background:var(--color-blue-light); }
-.bc-green { background:var(--color-green); }
-.bc-pink { background:var(--color-pink); }
-.bc-purple { background:var(--color-purple); }
-.bc-brown { background:var(--color-brown); }
-.bc-olive { background:var(--color-olive); }
-.bc-lemon { background:var(--color-lemon); }
-
-/* ========== LIST VIEW ========== */
-.list-view { padding:8px 0 80px; }
-.list-item {
-  display:flex; align-items:center;
-  padding:12px 20px;
-  border-bottom:1px solid var(--border-dark);
-  cursor:pointer;
-  transition: background 0.15s;
-}
-.list-item:active { background:rgba(255,255,255,0.03); }
-.list-item .color-dot {
-  width:5px; height:48px; border-radius:3px;
-  margin-right:14px; flex-shrink:0;
-}
-.list-item .item-info { flex:1; }
-.list-item .item-title {
-  font-size:14.5px; color:var(--text-primary);
-  margin-bottom:4px;
-}
-.list-item .item-meta {
-  font-size:12px; color:var(--text-muted);
-}
-.list-item .item-rating {
-  font-size:13.5px; color:var(--accent-gold);
-  text-align:right;
-}
-
-/* ========== CALENDAR VIEW ========== */
-.calendar-view { padding:16px 20px 80px; }
-.calendar-header {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:20px;
-}
-.calendar-header h3 {
-  font-family:'Noto Serif KR',serif;
-  font-size:19px; font-weight:700;
-  color:var(--text-primary);
-}
-.calendar-nav { display:flex; gap:6px; }
-.calendar-nav button {
-  width:32px; height:32px;
-  border:1px solid var(--border-light);
-  background:none;
-  color:var(--text-secondary);
-  font-size:16px;
-  cursor:pointer;
-  border-radius:4px;
-  display:flex; align-items:center; justify-content:center;
-}
-.cal-weekdays {
-  display:grid; grid-template-columns:repeat(7,1fr);
-  margin-bottom:8px;
-}
-.cal-weekdays span {
-  text-align:center;
-  font-size:10.5px; color:var(--text-muted);
-  padding:4px 0;
-}
-.cal-days {
-  display:grid; grid-template-columns:repeat(7,1fr);
-  gap:4px;
-}
-.cal-day {
-  aspect-ratio:1;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  font-size:13px; color:var(--text-primary);
-  border-radius:50%;
-  cursor:pointer;
-  position:relative;
-  transition:background 0.15s;
-}
-.cal-day:hover { background:rgba(255,255,255,0.05); }
-.cal-day.bold { font-weight:700; }
-.cal-day.empty { pointer-events:none; }
-.cal-day .dot-indicator {
-  width:5px; height:5px;
-  border-radius:50%;
-  position:absolute;
-  bottom:2px;
-}
-
-/* ========== DETAIL VIEW ========== */
-#detail {
-  z-index:10;
-}
-.detail-header {
-  background:var(--bg-secondary);
-  padding:14px 20px;
-  display:flex; align-items:center; gap:12px;
-  flex-shrink:0;
-}
-.detail-header .back-btn {
-  background:none; border:none; cursor:pointer;
-  padding:4px 8px 4px 0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.detail-header .back-btn svg {
-  width: 24px;
-  height: 24px;
-  fill: var(--text-secondary);
-}
-.detail-content {
-  flex:1; overflow-y:auto; padding:0 0 80px;
-}
-.detail-content::-webkit-scrollbar { display:none; }
-.detail-hero {
-  display:flex; height:180px;
-}
-.detail-hero .hero-image {
-  flex:1;
-  display:flex; align-items:center; justify-content:center;
-  border-bottom:1px solid var(--border-subtle);
-  font-size: 72px;
-}
-.detail-hero .hero-review {
-  flex:1;
-  background:#231F1A;
-  border-bottom:1px solid var(--border-subtle);
-  padding:16px;
-  display:flex; flex-direction:column; justify-content:center;
-}
-.detail-hero .hero-review p {
-  font-size:11.5px; color:var(--text-secondary);
-  line-height:1.6;
-}
-.detail-title-bar {
-  padding:16px 20px;
-  display:flex; align-items:center; gap:10px;
-  flex-wrap:wrap;
-}
-.detail-title-bar .emoji-icon { font-size:29px; }
-.detail-title-bar h2 {
-  font-family:'Noto Serif KR',serif;
-  font-size:16px; font-weight:700;
-  color:var(--text-primary);
-  flex: 1;
-  min-width: 0;
-}
-.detail-title-bar .rating {
-  font-size:14.5px; color:var(--accent-gold);
-  white-space: nowrap;
-}
-.detail-section {
-  padding:0 20px 16px;
-}
-.detail-section h4 {
-  font-size:11.5px; font-weight:700;
-  color:var(--accent-gold);
-  margin-bottom:8px;
-}
-.detail-section p {
-  font-size:14.5px; color:var(--text-secondary);
-  line-height:1.6;
-}
-.detail-actions {
-  display:flex; gap:10px;
-  padding:0 20px 20px;
-}
-.detail-actions button {
-  height:25px;
-  border:1px solid var(--border-light);
-  background:none;
-  color:var(--text-secondary);
-  font-size:10px;
-  padding:0 14px;
-  border-radius:20px;
-  cursor:pointer;
-  font-family:'Inter',sans-serif;
-}
-.detail-actions button:active { background:rgba(255,255,255,0.05); }
-
-/* ========== EXPLORE TAB ========== */
-.explore-tabs {
-  display:flex; height:28px; overflow-x:auto; gap:0;
-  flex-shrink:0;
-}
-.explore-tabs::-webkit-scrollbar { display:none; }
-.explore-tabs button {
-  height:100%; padding:0 16px; white-space:nowrap;
-  background:transparent;
-  border:1px solid var(--border-subtle);
-  font-size:12.5px; font-family:'Inter',sans-serif;
-  color:var(--text-muted);
-  cursor:pointer; transition:all 0.2s;
-  flex-shrink:0;
-}
-.explore-tabs button.active {
-  background:var(--bg-tab-active);
-  color:#000; font-weight:700;
-}
-.explore-category-tabs {
-  display:flex; gap:8px;
-  padding:12px 20px;
-  overflow-x:auto;
-}
-.explore-category-tabs::-webkit-scrollbar { display:none; }
-.explore-category-tabs button {
-  height:28px; padding:0 14px;
-  border:1px solid var(--border-subtle);
-  background:none;
-  color:var(--text-muted);
-  font-size:12.5px; border-radius:14px;
-  cursor:pointer; white-space:nowrap;
-  font-family:'Inter',sans-serif;
-}
-.explore-cards {
-  padding:0 15px 80px;
-  display:grid; grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-.explore-card {
-  background:var(--bg-card);
-  border:1px solid var(--border-dark);
-  border-radius:8px;
-  overflow:hidden;
-  cursor:pointer;
-  transition:transform 0.15s;
-}
-.explore-card:active { transform:scale(0.97); }
-.explore-card .card-cover {
-  height:100px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:40px;
-}
-.explore-card .card-body { padding:10px 12px; }
-.explore-card .card-title {
-  font-size:13px; font-weight:700; color:var(--text-primary);
-  margin-bottom:2px;
-}
-.explore-card .card-author {
-  font-size:11px; color:var(--text-muted);
-  margin-bottom:4px;
-}
-.explore-card .card-desc {
-  font-size:11.5px; color:var(--text-secondary);
-  line-height:1.3;
-  display:-webkit-box; -webkit-line-clamp:2;
-  -webkit-box-orient:vertical; overflow:hidden;
-  margin-bottom:6px;
-}
-.explore-card .card-footer {
-  display:flex; justify-content:space-between; align-items:center;
-}
-.explore-card .card-rating { font-size:10.5px; color:var(--accent-gold); }
-.explore-card .card-likes { font-size:11px; color:var(--text-muted); }
-
-/* ========== STATS TAB ========== */
-.stats-view { padding:20px 20px 80px; }
-.stats-section {
-  background:rgba(120,115,115,0.19);
-  border-radius:8px;
-  padding:20px;
-  margin-bottom:16px;
-}
-.stats-section h4 {
-  font-size:11.5px; color:var(--bg-tab-active);
-  margin-bottom:16px;
-}
-/* Radar Chart */
-.radar-container {
-  display:flex; justify-content:center;
-  padding:10px 0;
-}
-.radar-container svg { width:200px; height:200px; }
-/* Bar Chart */
-.bar-chart {
-  display:flex; align-items:flex-end; gap:4px;
-  height:80px; padding-top:10px;
-}
-.bar-col {
-  flex:1; display:flex; flex-direction:column;
-  align-items:center; gap:4px;
-}
-.bar-col .bar {
-  width:100%;
-  border-radius:2px 2px 0 0;
-  background:linear-gradient(180deg, var(--accent-gold) 0%, rgba(200,165,92,0.3) 100%);
-  min-height:2px;
-  transition:height 0.5s ease;
-}
-.bar-col span {
-  font-size:8.8px; color:var(--text-muted);
-  white-space:nowrap;
-}
-
-/* ========== SEARCH TAB ========== */
-.search-view {
-  flex:1; display:flex; flex-direction:column;
-}
-.search-bar-area {
-  background:var(--bg-secondary);
-  padding:12px 20px;
-  display:flex; align-items:center; gap:10px;
-}
-.search-bar-area .back-btn {
-  background:none; border:none; cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.search-bar-area .back-btn svg {
-  width: 24px;
-  height: 24px;
-  fill: var(--text-secondary);
-}
-.search-bar-area .search-input-wrap {
-  flex:1; height:36px;
-  background:var(--bg-card);
-  border:1px solid var(--border-light);
-  border-radius:6px;
-  display:flex; align-items:center;
-  padding:0 12px;
-}
-.search-bar-area .search-input-wrap input {
-  flex:1; background:none; border:none; outline:none;
-  font-size:14px; color:var(--text-primary);
-  font-family:'Inter',sans-serif;
-}
-.search-bar-area .search-input-wrap input::placeholder { color:var(--text-muted); }
-.search-empty {
-  flex:1; display:flex; flex-direction:column;
-  align-items:center; justify-content:center; gap:12px;
-}
-.search-empty .search-icon svg {
-  width: 28px;
-  height: 28px;
-  fill: var(--text-secondary);
-  opacity: 0.5;
-}
-.search-empty p { font-size:15px; color:var(--text-muted); }
-.search-results { padding:12px 20px 80px; }
-.search-results .list-item { padding:12px 0; }
-
-/* ========== BOTTOM NAV ========== */
-.bottom-nav {
-  position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  background:rgba(86,84,72,1);
-  border-top:none;
-  display:flex; align-items:center; justify-content:space-around;
-  height:var(--nav-height);
-  flex-shrink:0;
-  padding-bottom:env(safe-area-inset-bottom);
-  z-index:50;
-  border-radius:17px;
-}
-.nav-item {
-  display:flex; flex-direction:column;
-  align-items:center; gap:3px;
-  cursor:pointer;
-  padding:6px 12px;
-  border:none; background:none;
-}
-.nav-item .nav-icon {
-  width: 24px;
-  height: 24px;
-}
-.nav-item .nav-icon svg {
-  width: 100%;
-  height: 100%;
-  fill: #B1B1B1;
-}
-.nav-item.active .nav-icon svg {
-  fill: #FFFFFF;
-}
-.nav-item .nav-label {
-  font-size:9.5px; color:#B1B1B1;
-  font-family:'Inter',sans-serif;
-}
-.nav-item.active .nav-label { 
-  color:#FFFFFF;
-  font-weight:700;
-}
-.fab {
-  width:48px; height:48px;
-  background:var(--accent-yellow);
-  border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  font-size:26px; color:var(--text-dark);
-  border:none; cursor:pointer;
-  margin-top:-24px;
-  box-shadow:0 4px 16px rgba(249,216,148,0.3);
-  transition:transform 0.15s;
-}
-.fab:active { transform:scale(0.9); }
-
-/* ========== ADD MODAL ========== */
-.modal-overlay {
-  position:fixed; inset:0;
-  background:rgba(0,0,0,0.6);
-  z-index:200;
-  display:flex; align-items:flex-end; justify-content:center;
-  opacity:0; pointer-events:none;
-  transition:opacity 0.3s;
-}
-.modal-overlay.show { opacity:1; pointer-events:all; }
-.modal-sheet {
-  width:100%; max-width:430px;
-  background:var(--bg-card);
-  border-radius:20px 20px 0 0;
-  padding:20px 20px 40px;
-  transform:translateY(100%);
-  transition:transform 0.35s ease;
-}
-.modal-overlay.show .modal-sheet {
-  transform:translateY(0);
-}
-.modal-sheet .handle {
-  width:40px; height:4px;
-  background:var(--text-muted);
-  border-radius:2px;
-  margin:0 auto 20px;
-}
-.modal-sheet h3 {
-  font-family:'Noto Serif KR',serif;
-  font-size:18px; color:var(--text-primary);
-  margin-bottom:16px;
-}
-.modal-sheet .form-group {
-  margin-bottom:14px;
-}
-.modal-sheet label {
-  font-size:12px; color:var(--text-muted);
-  display:block; margin-bottom:6px;
-}
-.modal-sheet input, .modal-sheet select, .modal-sheet textarea {
-  width:100%; height:40px;
-  background:var(--bg-primary);
-  border:1px solid var(--border-light);
-  border-radius:6px;
-  padding:0 12px;
-  font-size:14px; color:var(--text-primary);
-  font-family:'Inter',sans-serif;
-  outline:none;
-}
-.modal-sheet textarea { height:80px; padding:10px 12px; resize:none; }
-.modal-sheet select { appearance:none; }
-.modal-sheet .btn-submit {
-  width:100%; height:46px;
-  background:var(--accent-yellow);
-  border:none; border-radius:6px;
-  font-size:16px; font-weight:700;
-  color:var(--text-dark);
-  cursor:pointer;
-  font-family:'Inter',sans-serif;
-  margin-top:6px;
-}
-
-/* ========== RESPONSIVE ========== */
-@media (min-width:431px) {
-  .app {
-    border-radius:38px;
-    max-height:812px;
-    margin-top:max(0px, calc(50vh - 406px));
-    box-shadow: 0 0 60px rgba(0,0,0,0.5);
-    overflow:hidden;
-  }
-}
-
-/* Animations */
-.fade-in { animation: fadeIn 0.5s ease forwards; }
-@keyframes fadeIn {
-  from { opacity:0; } to { opacity:1; }
-}
-.stagger > *:nth-child(1) { animation-delay:0s; }
-.stagger > *:nth-child(2) { animation-delay:0.05s; }
-.stagger > *:nth-child(3) { animation-delay:0.1s; }
-.stagger > *:nth-child(4) { animation-delay:0.15s; }
-.stagger > *:nth-child(5) { animation-delay:0.2s; }
-.stagger > *:nth-child(6) { animation-delay:0.25s; }
-.stagger > *:nth-child(7) { animation-delay:0.3s; }
-</style>
-</head>
-<body>
-<div class="app" id="app">
-
-  <!-- ===== SPLASH ===== -->
-  <div class="screen active" id="splash" onclick="showScreen('login')">
-    <div class="splash-content">
-      <div class="logo-icon">
-        <img src="https://media.discordapp.net/attachments/1441816699081855017/1469757805836632105/LOGO.png" alt="arTchieve Logo">
+  return (
+    <div className="fixed inset-0 flex flex-col items-center justify-center p-8 bg-[#11120D] text-[#D8CFBC] animate-fade-in z-[100]">
+      <div className="w-20 h-20 mb-6 bg-[#D8CFBC] rounded-full flex items-center justify-center text-[#11120D]">
+        <Book size={40} />
       </div>
-      <h1>arTchieve</h1>
-      <div class="tagline">기록하고, 수집하고, 전시하고</div>
-      <div class="tap-hint">화면을 터치하여 시작하기</div>
+      <h1 className="font-serif text-3xl mb-2">arTchieve</h1>
+      <p className="text-sm opacity-60 mb-10">당신의 예술을 기록하고 전시하세요</p>
+      
+      <form onSubmit={handleSubmit} className="w-full max-w-xs space-y-4">
+        <input 
+          type="email" 
+          placeholder="이메일" 
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          className="w-full bg-[#312B25] border border-[#565449] rounded p-3 text-white focus:border-[#D8CFBC] outline-none transition-colors"
+        />
+        <input 
+          type="password" 
+          placeholder="비밀번호" 
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          className="w-full bg-[#312B25] border border-[#565449] rounded p-3 text-white focus:border-[#D8CFBC] outline-none transition-colors"
+        />
+        <button 
+          type="submit" 
+          disabled={isLoading}
+          className="w-full bg-[#D8CFBC] text-[#11120D] font-bold p-3 rounded hover:bg-white transition-colors disabled:opacity-50"
+        >
+          {isLoading ? '로그인 중...' : '입장하기'}
+        </button>
+      </form>
+      <p className="mt-6 text-xs opacity-40">데모 계정: 아무 이메일이나 입력하세요</p>
     </div>
-  </div>
+  );
+};
 
-  <!-- ===== LOGIN ===== -->
-  <div class="screen" id="login">
-    <div class="login-logo">
-      <img src="https://media.discordapp.net/attachments/1441816699081855017/1469757805836632105/LOGO.png" alt="arTchieve Logo">
-    </div>
-    <h2>서재에 입장하기</h2>
-    <p class="login-sub">이메일로 시작하세요</p>
-    <div class="input-group">
-      <input type="text" placeholder="아이디" id="loginId">
-      <input type="password" placeholder="비밀번호" id="loginPw">
-    </div>
-    <button class="btn-login" onclick="doLogin()">로그인하기</button>
-    <div class="signup-link">회원가입</div>
-  </div>
+// 2. Settings / Customization Modal
+const SettingsModal = ({ user, onClose, onUpdate }) => {
+  const [libName, setLibName] = useState(user.libName);
+  const [theme, setTheme] = useState(user.theme || 'classic');
 
-  <!-- ===== HOME (서재) ===== -->
-  <div class="screen" id="home">
-    <div class="main-header">
-      <div class="top-row">
-        <div class="profile-area">
-          <div class="profile-pic">
-            <img src="https://media.discordapp.net/attachments/1441816699081855017/1469757805836632105/LOGO.png" alt="Profile">
+  const handleSave = () => {
+    onUpdate({ ...user, libName, theme });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-6 bg-black/80 animate-fade-in" onClick={onClose}>
+      <div className="w-full max-w-sm bg-[#1a1a1a] rounded-lg p-6 text-[#D8CFBC]" onClick={e => e.stopPropagation()}>
+        <h2 className="text-xl font-serif mb-6 border-b border-[#565449] pb-2">서재 설정</h2>
+        
+        <div className="space-y-6">
+          <div>
+            <label className="block text-xs uppercase opacity-60 mb-2">서재 이름</label>
+            <input 
+              value={libName}
+              onChange={(e) => setLibName(e.target.value)}
+              className="w-full bg-[#333] border border-[#565449] rounded p-2 text-white outline-none"
+            />
           </div>
-          <div class="profile-info">
-            <h3>보관소</h3>
-            <span>@Artchieve0102</span>
+
+          <div>
+            <label className="block text-xs uppercase opacity-60 mb-2">테마 선택</label>
+            <div className="grid grid-cols-3 gap-2">
+              {Object.keys(THEMES).map(t => (
+                <button
+                  key={t}
+                  onClick={() => setTheme(t)}
+                  className={`h-10 rounded border ${theme === t ? 'border-[#D8CFBC] ring-1 ring-[#D8CFBC]' : 'border-transparent'}`}
+                  style={{ backgroundColor: THEMES[t].bg }}
+                />
+              ))}
+            </div>
           </div>
         </div>
-        <div class="header-actions">
-          <button onclick="switchMainTab('search')" title="검색">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-            </svg>
-          </button>
-          <button class="profile-btn">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div class="sub-tabs" id="homeTabs">
-        <button class="active" onclick="switchSubTab('bookshelf',this)">책장</button>
-        <button onclick="switchSubTab('list',this)">리스트</button>
-        <button onclick="switchSubTab('calendar',this)">캘린더</button>
-        <button onclick="switchSubTab('stats-sub',this)">통계</button>
-      </div>
-    </div>
-    <div class="main-content" id="homeContent">
-      <!-- Bookshelf View (default) -->
-      <div id="bookshelf-view" class="bookshelf-grid">
-      </div>
-      <!-- List View -->
-      <div id="list-view" class="list-view" style="display:none">
-      </div>
-      <!-- Calendar View -->
-      <div id="calendar-view" class="calendar-view" style="display:none">
-      </div>
-      <!-- Stats Sub View -->
-      <div id="stats-sub-view" style="display:none;padding:20px 20px 80px;">
-        <div class="stats-section">
-          <h4>예술 성향 레이더</h4>
-          <div class="radar-container">
-            <svg viewBox="0 0 200 200" id="radarChart"></svg>
-          </div>
-        </div>
-        <div class="stats-section">
-          <h4>월별 기록 추이</h4>
-          <div class="bar-chart" id="barChart"></div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- ===== EXPLORE (탐색) ===== -->
-  <div class="screen" id="explore">
-    <div class="main-header">
-      <div class="top-row">
-        <div class="profile-area">
-          <div class="profile-pic">
-            <img src="https://media.discordapp.net/attachments/1441816699081855017/1469757805836632105/LOGO.png" alt="Profile">
-          </div>
-          <div class="profile-info">
-            <h3>보관소</h3>
-            <span>@Artchieve0102</span>
-          </div>
-        </div>
-        <div class="header-actions">
-          <button onclick="switchMainTab('search')">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-            </svg>
-          </button>
-          <button class="profile-btn">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div class="explore-tabs" id="exploreTabs">
-        <button class="active" onclick="switchExploreTab(this)">최신순</button>
-        <button onclick="switchExploreTab(this)">인기순</button>
-        <button onclick="switchExploreTab(this)">팔로잉</button>
-        <button onclick="switchExploreTab(this)">영화</button>
+        <button onClick={handleSave} className="w-full mt-8 bg-[#D8CFBC] text-[#11120D] py-3 rounded font-bold">
+          저장하기
+        </button>
       </div>
     </div>
-    <div class="main-content">
-      <div class="explore-category-tabs">
-        <button>회화</button>
-        <button>문학</button>
-        <button>음악</button>
-      </div>
-      <div class="explore-cards" id="exploreCards">
-      </div>
-      <div style="height:20px"></div>
-    </div>
-  </div>
+  );
+};
 
-  <!-- ===== STATS (통계) ===== -->
-  <div class="screen" id="stats">
-    <div class="main-header" style="padding-bottom:12px;">
-      <div class="top-row">
-        <div class="profile-area">
-          <button style="background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="switchMainTab('home')">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px;fill:var(--text-secondary);">
-              <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-            </svg>
-          </button>
-          <div class="profile-info">
-            <h3 style="font-size:14px;">통계</h3>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="main-content stats-view">
-      <div class="stats-section">
-        <h4>예술 성향 레이더</h4>
-        <div class="radar-container">
-          <svg viewBox="0 0 200 200" id="radarChart2"></svg>
-        </div>
-      </div>
-      <div class="stats-section">
-        <h4>월별 기록 추이</h4>
-        <div class="bar-chart" id="barChart2"></div>
-      </div>
-    </div>
-  </div>
+// 3. Library View with Categorized Shelves
+const LibraryView = ({ user, books, onWrite, onSelectBook, onOpenSettings }) => {
+  const [viewMode, setViewMode] = useState('shelf');
+  
+  // Calculate Level
+  const level = useMemo(() => {
+    return LEVEL_THRESHOLDS.findIndex(th => books.length < th) || LEVEL_THRESHOLDS.length;
+  }, [books.length]);
 
-  <!-- ===== SEARCH ===== -->
-  <div class="screen" id="search">
-    <div class="search-bar-area">
-      <button class="back-btn" onclick="goBack()">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-        </svg>
+  const currentTheme = THEMES[user.theme || 'classic'];
+
+  // Group books by category
+  const booksByCategory = useMemo(() => {
+    const grouped = {};
+    CATEGORIES.forEach(cat => grouped[cat.id] = []);
+    books.forEach(book => {
+      if(grouped[book.category]) grouped[book.category].push(book);
+      else grouped['lit'] ? grouped['lit'].push(book) : null; // Fallback
+    });
+    return grouped;
+  }, [books]);
+
+  return (
+    <div className="flex flex-col h-full" style={{ backgroundColor: currentTheme.bg, color: currentTheme.text }}>
+      <header className="px-6 py-6 flex justify-between items-end border-b border-white/10 shrink-0">
+        <div>
+          <h1 className="font-serif text-2xl font-bold mb-1">{user.libName}</h1>
+          <p className="text-xs opacity-60 flex items-center gap-2">
+            <span className="bg-white/10 px-2 py-0.5 rounded">Lv.{level}</span>
+            <span>{user.name}</span>
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <button onClick={onOpenSettings} className="p-2 rounded hover:bg-white/10"><Settings size={20} /></button>
+          <div className="w-[1px] h-6 bg-white/20 self-center"></div>
+          <button onClick={() => setViewMode('shelf')} className={`p-2 rounded ${viewMode === 'shelf' ? 'bg-white/20' : ''}`}><Grid size={20} /></button>
+          <button onClick={() => setViewMode('list')} className={`p-2 rounded ${viewMode === 'list' ? 'bg-white/20' : ''}`}><List size={20} /></button>
+        </div>
+      </header>
+
+      <main className="flex-1 overflow-y-auto p-6 scrollbar-hide pb-24">
+        {books.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center opacity-40">
+            <Book size={48} strokeWidth={1} className="mb-4" />
+            <p>서재가 비어있습니다.</p>
+            <p className="text-sm mt-2">첫 번째 예술을 수집해보세요.</p>
+          </div>
+        ) : viewMode === 'shelf' ? (
+          <div className="space-y-8">
+            {CATEGORIES.map(cat => {
+              const catBooks = booksByCategory[cat.id];
+              if (!catBooks || catBooks.length === 0) return null;
+              
+              return (
+                <div key={cat.id} className="animate-fade-in">
+                  <h3 className="text-sm font-bold opacity-70 mb-2 flex items-center gap-2">
+                    <cat.icon size={14} /> {cat.name}
+                  </h3>
+                  {/* Shelf Container */}
+                  <div className="relative border-b-[12px] border-[#3e3c36] px-4 pb-0 flex items-end h-44 gap-1 overflow-x-auto scrollbar-hide perspective-shelf bg-gradient-to-b from-transparent to-black/20">
+                    {catBooks.map((book) => (
+                      <div 
+                        key={book.id}
+                        onClick={() => onSelectBook(book)}
+                        className="cursor-pointer transition-all hover:-translate-y-4 hover:z-10 relative group shrink-0"
+                        style={{
+                          width: `${Math.min(60, Math.max(28, book.spineWidth))}px`,
+                          height: `${Math.min(160, Math.max(110, 120 + (book.rating * 5)))}px`,
+                          backgroundColor: book.spineColor,
+                          borderRadius: '2px 4px 4px 2px',
+                          boxShadow: 'inset 2px 0 5px rgba(0,0,0,0.3), 3px 5px 10px rgba(0,0,0,0.5)'
+                        }}
+                      >
+                        <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+                          <span className="writing-vertical text-[10px] text-white/90 font-serif truncate w-full text-center tracking-widest opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md">
+                            {book.title}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {books.map((book) => (
+              <div key={book.id} onClick={() => onSelectBook(book)} className="flex items-start gap-4 p-4 border border-white/10 rounded cursor-pointer hover:bg-white/5 transition-colors">
+                <div 
+                  className="w-16 h-24 rounded shadow-lg shrink-0 bg-cover bg-center bg-no-repeat" 
+                  style={{ 
+                    backgroundImage: `url(${book.coverImage || ''})`,
+                    backgroundColor: book.spineColor 
+                  }}
+                >
+                  {!book.coverImage && <div className="w-full h-full bg-black/20" />}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-lg font-serif font-bold truncate pr-2" style={{ color: currentTheme.highlight }}>{book.title}</h3>
+                    <div className="text-yellow-600 text-xs whitespace-nowrap">{'★'.repeat(Math.floor(book.rating))}</div>
+                  </div>
+                  <p className="text-xs opacity-60 mt-1 mb-2">{CATEGORIES.find(c=>c.id===book.category)?.name} • {book.date}</p>
+                  <p className="text-sm opacity-80 line-clamp-2">{book.review}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+
+      <button 
+        onClick={onWrite}
+        className="absolute bottom-24 right-6 w-14 h-14 rounded-full text-[#11120D] flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:scale-110 transition-transform z-40"
+        style={{ backgroundColor: currentTheme.text }}
+      >
+        <Plus size={28} />
       </button>
-      <div class="search-input-wrap">
-        <input type="text" placeholder="작품명, 태그로 검색..." id="searchInput" oninput="doSearch(this.value)">
-      </div>
     </div>
-    <div class="search-view">
-      <div class="search-empty" id="searchEmpty">
-        <div class="search-icon">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+  );
+};
+
+// 4. Other User's Library View
+const OtherLibraryView = ({ targetUser, onBack, currentTheme }) => {
+  return (
+    <div className="flex flex-col h-full bg-[#11120D] animate-fade-in" style={{ backgroundColor: currentTheme.bg, color: currentTheme.text }}>
+      <header className="px-6 py-6 border-b border-white/10 flex items-center gap-4">
+        <button onClick={onBack}><ChevronLeft /></button>
+        <div>
+          <h1 className="font-serif text-xl font-bold">{targetUser.libName}</h1>
+          <p className="text-xs opacity-60">사서 {targetUser.name}</p>
+        </div>
+      </header>
+      <main className="flex-1 p-6 overflow-y-auto">
+        <div className="grid grid-cols-3 gap-4">
+          {targetUser.books.map(book => (
+             <div key={book.id} className="aspect-[2/3] rounded bg-cover bg-center relative group" 
+                  style={{ backgroundColor: book.spineColor, backgroundImage: book.coverImage ? `url(${book.coverImage})` : 'none' }}>
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2 text-center">
+                  <span className="text-xs text-white">{book.title}</span>
+                </div>
+             </div>
+          ))}
+        </div>
+        {(!targetUser.books || targetUser.books.length === 0) && (
+          <p className="text-center opacity-40 mt-10">공개된 책이 없습니다.</p>
+        )}
+      </main>
+    </div>
+  );
+};
+
+// 5. Community View (Feed)
+const CommunityView = ({ currentUser, onFollow, onVisitUser, currentTheme }) => {
+  const [activeTab, setActiveTab] = useState('trending');
+  // Feed state local to component for interaction simulation
+  const [feed, setFeed] = useState([
+    { id: 101, userId: 'user_1', user: '심야의 시네필', title: '드라이브 마이 카', category: 'cinema', categoryName: '영화', date: '2023-10-12', rating: 5, review: '침묵이 대사가 되는 순간들.', spineColor: '#9B2C2C', likes: 24, isLiked: false },
+    { id: 102, userId: 'user_2', user: '미술관 옆 동물원', title: '에드워드 호퍼 전', category: 'art', categoryName: '회화', date: '2023-11-05', rating: 4, review: '고독이 세련되게 표현될 때.', spineColor: '#565449', likes: 18, isLiked: false },
+    { id: 103, userId: 'user_3', user: '베토벤의 귀', title: '조성진 리사이틀', category: 'music', categoryName: '음악', date: '2024-01-15', rating: 5, review: '건반 위에서 춤추는 손가락.', spineColor: '#D69E2E', likes: 42, isLiked: false },
+  ]);
+
+  const toggleLike = (id) => {
+    setFeed(prev => prev.map(item => {
+      if(item.id === id) {
+        return { ...item, isLiked: !item.isLiked, likes: item.isLiked ? item.likes - 1 : item.likes + 1 };
+      }
+      return item;
+    }));
+  };
+
+  const isFollowing = (userId) => currentUser.following.includes(userId);
+
+  const filteredFeed = activeTab === 'following' 
+    ? feed.filter(item => isFollowing(item.userId))
+    : feed;
+
+  return (
+    <div className="flex flex-col h-full" style={{ backgroundColor: currentTheme.bg, color: currentTheme.text }}>
+      <header className="px-6 py-6 border-b border-white/10 shrink-0">
+        <h1 className="font-serif text-2xl mb-4">탐색</h1>
+        <div className="flex gap-6 text-sm tracking-widest">
+          <button onClick={() => setActiveTab('trending')} className={`pb-1 border-b-2 transition-colors ${activeTab === 'trending' ? 'border-[#D8CFBC]' : 'border-transparent opacity-50'}`}>트렌드</button>
+          <button onClick={() => setActiveTab('following')} className={`pb-1 border-b-2 transition-colors ${activeTab === 'following' ? 'border-[#D8CFBC]' : 'border-transparent opacity-50'}`}>팔로잉</button>
+        </div>
+      </header>
+
+      <main className="flex-1 overflow-y-auto p-6 scrollbar-hide pb-24 space-y-6">
+        {filteredFeed.length === 0 && (
+           <div className="text-center opacity-50 mt-10">피드가 비어있습니다.</div>
+        )}
+        {filteredFeed.map((item) => (
+          <div key={item.id} className="bg-white/5 rounded-lg overflow-hidden border border-white/10">
+            <div className="p-4 flex items-center justify-between">
+              <div 
+                className="flex items-center gap-2 cursor-pointer hover:opacity-80"
+                onClick={() => onVisitUser(MOCK_USERS[item.userId] || { name: item.user, libName: '서재', books: [] })}
+              >
+                <div className="w-8 h-8 rounded-full bg-[#565449] flex items-center justify-center text-xs text-white">{item.user[0]}</div>
+                <span className="text-sm font-bold">{item.user}</span>
+              </div>
+              {!isFollowing(item.userId) && (
+                <button 
+                  onClick={() => onFollow(item.userId)} 
+                  className="text-xs text-[#D8CFBC] border border-[#D8CFBC] px-2 py-1 rounded hover:bg-[#D8CFBC] hover:text-black transition-colors"
+                >
+                  팔로우
+                </button>
+              )}
+            </div>
+            
+            <div className="px-4 pb-4 flex gap-4">
+               <div className="w-20 h-28 shrink-0 rounded shadow-md" style={{ backgroundColor: item.spineColor }}></div>
+               <div className="flex-1 min-w-0">
+                 <div className="text-xs opacity-70 mb-1">{item.categoryName}</div>
+                 <h3 className="text-lg font-serif font-bold mb-1 truncate">{item.title}</h3>
+                 <div className="text-yellow-600 text-xs mb-2">{'★'.repeat(item.rating)}</div>
+                 <p className="text-sm opacity-80 line-clamp-2 leading-relaxed">"{item.review}"</p>
+               </div>
+            </div>
+
+            <div className="px-4 py-3 bg-black/20 flex justify-between items-center border-t border-white/5">
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => toggleLike(item.id)}
+                  className={`flex items-center gap-1 text-xs transition-colors ${item.isLiked ? 'text-red-500' : 'opacity-50 hover:opacity-100'}`}
+                >
+                  <Heart size={16} fill={item.isLiked ? "currentColor" : "none"} /> {item.likes}
+                </button>
+              </div>
+              <button className="flex items-center gap-1 text-xs opacity-70 hover:opacity-100">
+                <Bookmark size={14} /> 담기
+              </button>
+            </div>
+          </div>
+        ))}
+      </main>
+    </div>
+  );
+};
+
+// 6. Stats View with Real Activity Map
+const StatsView = ({ books, user, currentTheme }) => {
+  const level = Math.floor(books.length / 5) + 1;
+
+  // Radar Chart Data Logic
+  const stats = useMemo(() => {
+    const counts = { cinema: 0, theater: 0, art: 0, dance: 0, arch: 0, lit: 0, music: 0 };
+    books.forEach(b => { if (counts[b.category] !== undefined) counts[b.category]++ });
+    const maxVal = Math.max(...Object.values(counts), 1); 
+    return Object.keys(counts).map(key => ({
+      key, label: CATEGORIES.find(c => c.id === key).name,
+      value: counts[key],
+      normalized: (counts[key] / maxVal) * 100
+    }));
+  }, [books]);
+
+  const getPolygonPoints = (data, radius, center) => {
+    const angleStep = (Math.PI * 2) / data.length;
+    return data.map((d, i) => {
+      const value = d.normalized || 10;
+      const r = (value / 100) * radius;
+      const x = center + r * Math.cos(i * angleStep - Math.PI / 2);
+      const y = center + r * Math.sin(i * angleStep - Math.PI / 2);
+      return `${x},${y}`;
+    }).join(' ');
+  };
+  const radarPoints = getPolygonPoints(stats, 80, 100);
+  const bgPoints = getPolygonPoints(stats.map(() => ({ normalized: 100 })), 80, 100);
+
+  // Activity Heatmap Logic (Last 28 days)
+  const activityMap = useMemo(() => {
+    const days = [];
+    for (let i = 27; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      const count = books.filter(b => b.date === dateStr).length;
+      days.push({ date: dateStr, count });
+    }
+    return days;
+  }, [books]);
+
+  return (
+    <div className="flex flex-col h-full" style={{ backgroundColor: currentTheme.bg, color: currentTheme.text }}>
+      <header className="px-6 py-6 border-b border-white/10 shrink-0">
+        <h1 className="font-serif text-2xl">취향 분석</h1>
+        <p className="text-xs opacity-60 mt-1">당신의 예술적 DNA</p>
+      </header>
+      <main className="flex-1 overflow-y-auto p-6 scrollbar-hide pb-24">
+        <div className="bg-white/5 rounded p-6 mb-8 flex items-center gap-4 border border-white/10">
+          <div className="w-16 h-16 rounded-full bg-[#565449] flex items-center justify-center text-2xl shadow-lg">
+             {level > 5 ? '👑' : '🎓'}
+          </div>
+          <div>
+            <div className="text-xs opacity-70 uppercase tracking-wider mb-1">Current Level</div>
+            <div className="text-xl font-serif font-bold">Lv. {level} {level > 5 ? '마에스트로' : '수집가'}</div>
+            <div className="w-32 h-1 bg-gray-700 mt-2 rounded-full overflow-hidden">
+               <div className="h-full bg-[#D8CFBC]" style={{ width: `${(books.length % 5) * 20}%`}}></div>
+            </div>
+            <div className="text-[10px] opacity-50 mt-1">다음 레벨까지 {5 - (books.length % 5)}권 남음</div>
+          </div>
+        </div>
+
+        <div className="mb-10 flex justify-center">
+          <svg width="200" height="200" className="overflow-visible">
+            <polygon points={bgPoints} fill="none" stroke="#333" strokeWidth="1" />
+            <polygon points={radarPoints} fill="rgba(216, 207, 188, 0.2)" stroke={currentTheme.text} strokeWidth="2" />
+            {stats.map((d, i) => {
+               const angle = i * ((Math.PI * 2) / stats.length) - Math.PI / 2;
+               const x = 100 + 115 * Math.cos(angle);
+               const y = 100 + 115 * Math.sin(angle);
+               return <text key={d.key} x={x} y={y} textAnchor="middle" fill="#888" fontSize="10" dy="4">{d.label}</text>;
+            })}
           </svg>
         </div>
-        <p>서재에서 기록을 찾아보세요</p>
-      </div>
-      <div class="search-results list-view" id="searchResults" style="display:none;padding:0 20px;"></div>
-    </div>
-  </div>
 
-  <!-- ===== DETAIL ===== -->
-  <div class="screen" id="detail">
-    <div class="detail-header">
-      <button class="back-btn" onclick="goBack()">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-        </svg>
+        <div>
+          <h3 className="text-sm font-bold mb-4 flex justify-between items-center">
+             <span>최근 수집 활동</span>
+             <span className="text-[10px] opacity-50">지난 28일</span>
+          </h3>
+          <div className="grid grid-cols-7 gap-1.5">
+             {activityMap.map((day, i) => (
+               <div 
+                key={i} 
+                className={`aspect-square rounded-sm transition-all hover:scale-110 cursor-help
+                  ${day.count === 0 ? 'bg-white/5' : day.count === 1 ? 'bg-[#D8CFBC]/40' : day.count === 2 ? 'bg-[#D8CFBC]/70' : 'bg-[#D8CFBC]'}`}
+                title={`${day.date}: ${day.count}권`}
+               />
+             ))}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+// 7. Write Mode with Image Upload
+const WriteMode = ({ onCancel, onSave }) => {
+  const [step, setStep] = useState(1);
+  const [data, setData] = useState({
+    category: '', title: '', date: new Date().toISOString().slice(0, 10),
+    rating: 3.0, review: '', spineColor: '#565449', coverImage: null
+  });
+  const fileInputRef = useRef(null);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setData({...data, coverImage: imageUrl});
+    }
+  };
+
+  const handleSave = () => {
+    const selectedCat = CATEGORIES.find(c => c.id === data.category);
+    onSave({
+      ...data,
+      id: Date.now(),
+      categoryName: selectedCat?.name || '기타',
+      spineWidth: 24 + Math.min(40, data.review.length / 5),
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] flex flex-col bg-[#11120D] text-[#D8CFBC]">
+      <header className="px-6 py-4 flex justify-between items-center border-b border-white/10">
+        <button onClick={onCancel}><X size={24} /></button>
+        <span className="font-serif text-lg">기록하기 ({step}/3)</span>
+        <div className="w-6"></div> 
+      </header>
+
+      <main className="flex-1 overflow-y-auto p-6">
+        {step === 1 && (
+          <div className="animate-fade-in">
+            <h2 className="text-2xl font-serif mb-8">어떤 예술을 수집했나요?</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => { setData({...data, category: cat.id, spineColor: cat.color}); setStep(2); }}
+                  className="p-6 border border-[#565449] rounded hover:bg-white/10 transition-all flex flex-col items-center gap-3"
+                >
+                  <cat.icon size={32} style={{ color: cat.color }} />
+                  <span className="font-light">{cat.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="animate-fade-in space-y-8">
+            {/* Image Upload Area */}
+            <div 
+              className="w-full h-48 border border-dashed border-[#565449] rounded flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 bg-cover bg-center"
+              onClick={() => fileInputRef.current.click()}
+              style={{ backgroundImage: data.coverImage ? `url(${data.coverImage})` : 'none' }}
+            >
+              {!data.coverImage && (
+                <>
+                  <Camera size={32} className="opacity-50 mb-2" />
+                  <span className="text-xs opacity-50">표지 사진 추가 (선택)</span>
+                </>
+              )}
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload}/>
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase opacity-60 mb-2">작품 제목</label>
+              <input 
+                type="text" value={data.title} onChange={(e) => setData({...data, title: e.target.value})}
+                className="w-full bg-transparent border-b border-[#565449] py-2 text-2xl font-serif focus:outline-none focus:border-[#D8CFBC]"
+                placeholder="제목 입력"
+              />
+            </div>
+            <div>
+              <label className="block text-xs uppercase opacity-60 mb-2">관람일</label>
+              <input 
+                type="date" value={data.date} onChange={(e) => setData({...data, date: e.target.value})}
+                className="w-full bg-transparent border-b border-[#565449] py-2 text-lg focus:outline-none"
+              />
+            </div>
+            <button 
+              onClick={() => data.title ? setStep(3) : null}
+              className={`w-full py-4 rounded bg-[#565449] text-white mt-8 ${!data.title ? 'opacity-50' : ''}`}
+            >
+              다음 단계
+            </button>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="animate-fade-in space-y-8">
+             <div className="bg-white/5 p-4 rounded-lg border-l-2 border-[#D8CFBC]">
+              <p className="text-sm text-[#D8CFBC] italic mb-2">Editor's Pick Question</p>
+              <p className="text-lg font-serif">{CATEGORIES.find(c => c.id === data.category)?.prompt}</p>
+            </div>
+            <textarea 
+              value={data.review} onChange={(e) => setData({...data, review: e.target.value})}
+              className="w-full h-40 bg-transparent border border-[#565449] rounded p-4 focus:outline-none focus:border-[#D8CFBC] resize-none leading-relaxed"
+              placeholder="자유롭게 감상을 남겨주세요."
+            />
+            <button onClick={handleSave} className="w-full py-4 rounded-sm bg-[#D8CFBC] text-[#11120D] font-bold tracking-widest mt-4 shadow-lg">
+              서재에 꽂기
+            </button>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+};
+
+// 8. Book Detail Modal
+const BookDetail = ({ book, onClose }) => {
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 backdrop-blur-md bg-black/80 animate-fade-in" onClick={onClose}>
+      <div 
+        className="w-full max-w-md bg-[#FFFBF4] text-[#11120D] rounded-sm shadow-2xl overflow-hidden max-h-[85vh] flex flex-col relative"
+        onClick={e => e.stopPropagation()}
+      >
+        {book.coverImage && (
+          <div className="h-48 w-full bg-cover bg-center" style={{ backgroundImage: `url(${book.coverImage})` }}>
+            <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-black/50 to-transparent"></div>
+          </div>
+        )}
+        {!book.coverImage && <div className="h-2 w-full" style={{ backgroundColor: book.spineColor }}></div>}
+        
+        <div className="p-8 overflow-y-auto custom-scrollbar">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <span className="inline-block px-2 py-1 bg-[#11120D] text-[#D8CFBC] text-xs uppercase tracking-wider mb-2">{CATEGORIES.find(c=>c.id===book.category)?.name}</span>
+              <h2 className="text-3xl font-serif font-bold leading-tight">{book.title}</h2>
+            </div>
+            <div className="flex flex-col items-end">
+              <span className="text-xs opacity-50">{book.date}</span>
+              <span className="text-yellow-700 text-sm mt-1">{'★'.repeat(book.rating)}</span>
+            </div>
+          </div>
+          
+          <div className="border-t border-b border-[#11120D]/10 py-6 my-6">
+            <p className="font-serif leading-loose whitespace-pre-wrap text-lg">{book.review}</p>
+          </div>
+        </div>
+        <button onClick={onClose} className="absolute top-4 right-4 text-black/50 hover:text-black">
+          <X size={24} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Bottom Navigation
+const BottomNav = ({ currentTab, onTabChange, theme }) => {
+  return (
+    <div className="fixed bottom-0 left-0 right-0 border-t border-white/10 py-2 px-6 flex justify-between items-center z-50 h-20"
+         style={{ backgroundColor: theme.bg }}>
+      <button onClick={() => onTabChange('library')} className={`flex flex-col items-center gap-1 p-2 ${currentTab === 'library' ? 'opacity-100' : 'opacity-50'}`}>
+        <Book size={24} />
+        <span className="text-[10px] tracking-widest">내 서재</span>
+      </button>
+      <button onClick={() => onTabChange('community')} className={`flex flex-col items-center gap-1 p-2 ${currentTab === 'community' ? 'opacity-100' : 'opacity-50'}`}>
+        <Globe size={24} />
+        <span className="text-[10px] tracking-widest">탐색</span>
+      </button>
+      <button onClick={() => onTabChange('stats')} className={`flex flex-col items-center gap-1 p-2 ${currentTab === 'stats' ? 'opacity-100' : 'opacity-50'}`}>
+        <PieChart size={24} />
+        <span className="text-[10px] tracking-widest">분석</span>
       </button>
     </div>
-    <div class="detail-content" id="detailContent">
-    </div>
-  </div>
-
-  <!-- ===== BOTTOM NAV ===== -->
-  <div class="bottom-nav" id="bottomNav" style="display:none;">
-    <button class="nav-item active" data-tab="home" onclick="switchMainTab('home')">
-      <span class="nav-icon">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
-        </svg>
-      </span>
-      <span class="nav-label">서재</span>
-    </button>
-    <button class="nav-item" data-tab="explore" onclick="switchMainTab('explore')">
-      <span class="nav-icon">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-        </svg>
-      </span>
-      <span class="nav-label">탐색</span>
-    </button>
-    <button class="fab" onclick="openAddModal()">+</button>
-    <button class="nav-item" data-tab="stats" onclick="switchMainTab('stats')">
-      <span class="nav-icon">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
-        </svg>
-      </span>
-      <span class="nav-label">통계</span>
-    </button>
-    <button class="nav-item" data-tab="search" onclick="switchMainTab('search')">
-      <span class="nav-icon">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-        </svg>
-      </span>
-      <span class="nav-label">검색</span>
-    </button>
-  </div>
-
-  <!-- ===== ADD MODAL ===== -->
-  <div class="modal-overlay" id="addModal" onclick="closeAddModal(event)">
-    <div class="modal-sheet" onclick="event.stopPropagation()">
-      <div class="handle"></div>
-      <h3>새 기록 추가</h3>
-      <div class="form-group">
-        <label>작품명</label>
-        <input type="text" placeholder="작품 이름을 입력하세요" id="addTitle">
-      </div>
-      <div class="form-group">
-        <label>카테고리</label>
-        <select id="addCategory">
-          <option value="영화">영화</option>
-          <option value="문학">문학</option>
-          <option value="음악">음악</option>
-          <option value="뮤지컬">뮤지컬</option>
-          <option value="건축">건축</option>
-          <option value="미술">미술</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>별점</label>
-        <select id="addRating">
-          <option value="5">★★★★★</option>
-          <option value="4" selected>★★★★☆</option>
-          <option value="3">★★★☆☆</option>
-          <option value="2">★★☆☆☆</option>
-          <option value="1">★☆☆☆☆</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>리뷰</label>
-        <textarea placeholder="감상을 남겨보세요..." id="addReview"></textarea>
-      </div>
-      <button class="btn-submit" onclick="submitRecord()">기록하기</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ===== DATA =====
-const categoryEmojis = {
-  '영화':'🎬','문학':'📖','음악':'🎵','뮤지컬':'🎭','건축':'🏛️','미술':'🎨'
-};
-const categoryColors = {
-  '영화':'var(--color-blue)','문학':'var(--color-red)',
-  '음악':'var(--color-lemon)','뮤지컬':'var(--color-purple)',
-  '건축':'var(--color-green)','미술':'var(--color-brown)'
-};
-const bookColors = ['bc-blue','bc-green','bc-pink','bc-purple','bc-brown','bc-olive','bc-lemon'];
-
-let records = [
-  {id:1, title:'인사이드 아웃 2', category:'영화', date:'2026-01-15', rating:4, review:'감정의 복잡성을 이렇게 아름답게 표현할 수 있다니. 불안이라는 감정이 나쁜 것만은 아니라는 메시지가 인상적이었다.', color:'var(--color-blue)'},
-  {id:2, title:'작은 아씨들', category:'문학', date:'2026-01-20', rating:4, review:'시대를 초월한 자매애와 성장의 이야기. 각자의 꿈을 향해 나아가는 모습이 감동적이다.', color:'var(--color-red)'},
-  {id:3, title:'라라랜드', category:'영화', date:'2026-01-25', rating:3, review:'꿈과 사랑 사이의 선택. 아름다운 영상미와 음악이 여운을 남긴다.', color:'var(--color-amber)'},
-  {id:4, title:'서울도시건축비엔날레', category:'건축', date:'2025-11-25', rating:2, review:'도시 건축의 미래를 엿볼 수 있었던 전시. 기대에는 못 미쳤다.', color:'var(--color-green)'},
-  {id:5, title:'CIRCUS MAXIMUS in Korea', category:'음악', date:'2025-10-25', rating:5, review:'Travis Scott의 에너지가 폭발하는 공연. 잊을 수 없는 경험.', color:'var(--color-lemon)'},
-  {id:6, title:'지킬앤하이드', category:'뮤지컬', date:'2025-07-13', rating:3, review:'인간 내면의 이중성을 탐구하는 뮤지컬. 배우들의 열연이 돋보였다.', color:'var(--color-purple)'},
-  {id:7, title:'국립현대미술관', category:'미술', date:'2026-02-01', rating:4, review:'한국 현대미술의 흐름을 한눈에. 다양한 매체의 작품들이 인상적.', color:'var(--color-brown)'},
-];
-
-let exploreData = [
-  {title:'위플래쉬', author:'밤하늘의 영화관', category:'영화', desc:'드럼 소리가 아직도 귓가에 맴돈다...', rating:5, likes:47, color:'var(--color-orange)'},
-  {title:'1984', author:'책벌레 다람쥐', category:'문학', desc:'오웰의 예언이 현실이 되어가는 느낌...', rating:4, likes:32, color:'var(--color-blue)'},
-  {title:'별이 빛나는 밤에', author:'미술관 산책', category:'미술', desc:'고흐의 붓터치에서 느껴지는 광기와 아름다움', rating:5, likes:58, color:'var(--color-olive)'},
-  {title:'노르웨이의 숲', author:'문학소녀', category:'문학', desc:'무라카미의 서정적 세계에 빠져들다', rating:4, likes:41, color:'var(--color-green)'},
-];
-
-let navHistory = [];
-let currentTab = 'home';
-let previousTab = null;
-
-// ===== SCREEN MANAGEMENT =====
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => {
-    if(s.classList.contains('active')) s.classList.add('slide-left');
-    s.classList.remove('active');
-  });
-  setTimeout(()=>{
-    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('slide-left'));
-  },350);
-  document.getElementById(id).classList.add('active');
-
-  const showNav = ['home','explore','stats'].includes(id);
-  document.getElementById('bottomNav').style.display = showNav ? 'flex' : 'none';
-}
-
-function switchMainTab(tab) {
-  previousTab = currentTab;
-  currentTab = tab;
-  if(!['detail'].includes(tab)) navHistory = [];
-
-  document.querySelectorAll('.nav-item').forEach(n=>{
-    n.classList.toggle('active', n.dataset.tab===tab);
-  });
-
-  showScreen(tab);
-  if(tab==='search') {
-    setTimeout(()=>document.getElementById('searchInput')?.focus(),400);
-  }
-}
-
-function goBack() {
-  if(previousTab) {
-    showScreen(previousTab);
-    currentTab = previousTab;
-    document.querySelectorAll('.nav-item').forEach(n=>{
-      n.classList.toggle('active', n.dataset.tab===currentTab);
-    });
-    document.getElementById('bottomNav').style.display = 
-      ['home','explore','stats'].includes(currentTab) ? 'flex' : 'none';
-  } else {
-    switchMainTab('home');
-  }
-}
-
-function doLogin() {
-  showScreen('home');
-  document.getElementById('bottomNav').style.display = 'flex';
-  currentTab = 'home';
-  renderBookshelf();
-  renderList();
-  renderCalendar();
-  renderStats();
-  renderExplore();
-}
-
-// ===== SUB TABS =====
-function switchSubTab(view, btn) {
-  document.querySelectorAll('#homeTabs button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  ['bookshelf-view','list-view','calendar-view','stats-sub-view'].forEach(v=>{
-    document.getElementById(v).style.display='none';
-  });
-  document.getElementById(view+'-view').style.display='';
-}
-
-function switchExploreTab(btn) {
-  document.querySelectorAll('#exploreTabs button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-// ===== RENDER BOOKSHELF =====
-function renderBookshelf() {
-  const el = document.getElementById('bookshelf-view');
-  el.innerHTML = '';
-  const perRow = 4;
-  
-  for(let i=0; i<records.length; i++){
-    const book = document.createElement('div');
-    book.className = 'book-spine ' + bookColors[i % bookColors.length];
-    book.onclick = () => openDetail(records[i]);
-    book.title = records[i].title;
-    el.appendChild(book);
-    
-    // Add shelf after every 4 books
-    if((i+1) % perRow === 0) {
-      const shelf = document.createElement('div');
-      shelf.className='shelf-row';
-      el.appendChild(shelf);
-    }
-  }
-  
-  // Add final shelf if needed
-  if(records.length % perRow !== 0) {
-    const shelf = document.createElement('div');
-    shelf.className='shelf-row';
-    el.appendChild(shelf);
-  }
-}
-
-// ===== RENDER LIST =====
-function renderList() {
-  const el = document.getElementById('list-view');
-  el.innerHTML = records.map(r => `
-    <div class="list-item" onclick="openDetail(records.find(x=>x.id===${r.id}))">
-      <div class="color-dot" style="background:${r.color}"></div>
-      <div class="item-info">
-        <div class="item-title">${r.title}</div>
-        <div class="item-meta">${r.category} · ${r.date}</div>
-      </div>
-      <div class="item-rating">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
-    </div>
-  `).join('');
-}
-
-// ===== RENDER CALENDAR =====
-function renderCalendar() {
-  const el = document.getElementById('calendar-view');
-  const year=2026, month=2;
-  const firstDay = new Date(year, month-1, 1).getDay();
-  const daysInMonth = new Date(year, month, 0).getDate();
-
-  // Records in this month
-  const monthRecords = records.filter(r=>{
-    const d=new Date(r.date);
-    return d.getFullYear()===year && d.getMonth()===month-1;
-  });
-  const recordDays = {};
-  monthRecords.forEach(r=>{
-    const day = new Date(r.date).getDate();
-    recordDays[day] = r;
-  });
-
-  el.innerHTML = `
-    <div class="calendar-header">
-      <h3>${year}년 ${month}월</h3>
-      <div class="calendar-nav">
-        <button>◀</button>
-        <button>▶</button>
-      </div>
-    </div>
-    <div class="cal-weekdays">
-      <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
-    </div>
-    <div class="cal-days" id="calDays"></div>
-  `;
-
-  const grid = document.getElementById('calDays');
-  // Empty cells before first day
-  for(let i=0;i<firstDay;i++){
-    grid.innerHTML += '<div class="cal-day empty"></div>';
-  }
-  for(let d=1;d<=daysInMonth;d++){
-    const rec = recordDays[d];
-    const bold = rec ? 'bold' : '';
-    const dot = rec ? `<div class="dot-indicator" style="background:${rec.color}"></div>` : '';
-    grid.innerHTML += `<div class="cal-day ${bold}" ${rec?`onclick="openDetail(records.find(x=>x.id===${rec.id}))"`:''}>${d}${dot}</div>`;
-  }
-}
-
-// ===== RENDER STATS =====
-function renderStats() {
-  renderRadar('radarChart');
-  renderRadar('radarChart2');
-  renderBarChart('barChart');
-  renderBarChart('barChart2');
-}
-
-function renderRadar(svgId) {
-  const svg = document.getElementById(svgId);
-  if(!svg) return;
-  const cx=100, cy=100, r=70;
-  const labels = ['영화','문학','음악','뮤지컬','건축','미술','사진'];
-  const values = [0.85, 0.6, 0.75, 0.5, 0.4, 0.7, 0.3];
-  const n = labels.length;
-
-  let gridLines = '';
-  [0.33,0.66,1].forEach(scale=>{
-    let pts=[];
-    for(let i=0;i<n;i++){
-      const angle = (Math.PI*2*i/n) - Math.PI/2;
-      pts.push(`${cx+r*scale*Math.cos(angle)},${cy+r*scale*Math.sin(angle)}`);
-    }
-    gridLines += `<polygon points="${pts.join(' ')}" fill="none" stroke="var(--accent-gold)" stroke-opacity="0.15" stroke-width="1"/>`;
-  });
-
-  let dataPts=[], labelEls='';
-  for(let i=0;i<n;i++){
-    const angle = (Math.PI*2*i/n) - Math.PI/2;
-    const x = cx + r*values[i]*Math.cos(angle);
-    const y = cy + r*values[i]*Math.sin(angle);
-    dataPts.push(`${x},${y}`);
-    const lx = cx + (r+18)*Math.cos(angle);
-    const ly = cy + (r+18)*Math.sin(angle);
-    labelEls += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" fill="var(--text-muted)" font-size="9" font-family="Inter">${labels[i]}</text>`;
-  }
-
-  svg.innerHTML = gridLines + 
-    `<polygon points="${dataPts.join(' ')}" fill="rgba(200,165,92,0.13)" stroke="var(--accent-gold)" stroke-width="2"/>` +
-    dataPts.map(p=>{
-      const [x,y]=p.split(',');
-      return `<circle cx="${x}" cy="${y}" r="3" fill="var(--accent-gold)"/>`;
-    }).join('') + labelEls;
-}
-
-function renderBarChart(containerId) {
-  const el = document.getElementById(containerId);
-  if(!el) return;
-  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  const values = [5,4,3,2.5,0,0,1,0,0,1,1,0];
-  const max = Math.max(...values,1);
-  el.innerHTML = months.map((m,i) => `
-    <div class="bar-col">
-      <div class="bar" style="height:${values[i]/max*60}px"></div>
-      <span>${m}</span>
-    </div>
-  `).join('');
-}
-
-// ===== RENDER EXPLORE =====
-function renderExplore() {
-  const el = document.getElementById('exploreCards');
-  el.innerHTML = exploreData.map((e,i) => `
-    <div class="explore-card" onclick="openExploreDetail(${i})">
-      <div class="card-cover" style="background:${e.color}">
-        ${categoryEmojis[e.category]||'📖'}
-      </div>
-      <div class="card-body">
-        <div class="card-title">${e.title}</div>
-        <div class="card-author">by ${e.author}</div>
-        <div class="card-desc">${e.desc}</div>
-        <div class="card-footer">
-          <span class="card-rating">${'★'.repeat(e.rating)}${'☆'.repeat(5-e.rating)}</span>
-          <span class="card-likes">♥ ${e.likes}</span>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-// ===== DETAIL =====
-function openDetail(rec) {
-  previousTab = currentTab;
-  const el = document.getElementById('detailContent');
-  el.innerHTML = `
-    <div class="detail-hero">
-      <div class="hero-image" style="background:${rec.color}">
-        <span class="emoji-large">${categoryEmojis[rec.category]||'📖'}</span>
-      </div>
-      <div class="hero-review">
-        <p>${rec.review}</p>
-      </div>
-    </div>
-    <div class="detail-title-bar">
-      <span class="emoji-icon">${categoryEmojis[rec.category]||'📖'}</span>
-      <h2>${rec.title}</h2>
-      <span class="rating">${'★'.repeat(rec.rating)}${'☆'.repeat(5-rec.rating)} ${rec.rating}.0</span>
-    </div>
-    <div class="detail-section">
-      <h4>리뷰</h4>
-      <p>${rec.review}</p>
-    </div>
-    <div class="detail-section">
-      <h4>정보</h4>
-      <p>${rec.category} · ${rec.date}</p>
-    </div>
-    <div class="detail-actions">
-      <button>♥ 좋아요</button>
-      <button>💬 댓글</button>
-    </div>
-  `;
-  showScreen('detail');
-  document.getElementById('bottomNav').style.display='none';
-}
-
-function openExploreDetail(i) {
-  const e = exploreData[i];
-  previousTab = 'explore';
-  const el = document.getElementById('detailContent');
-  el.innerHTML = `
-    <div class="detail-hero">
-      <div class="hero-image" style="background:${e.color}">
-        <span class="emoji-large">${categoryEmojis[e.category]||'📖'}</span>
-      </div>
-      <div class="hero-review">
-        <p>${e.desc}</p>
-      </div>
-    </div>
-    <div class="detail-title-bar">
-      <span class="emoji-icon">${categoryEmojis[e.category]||'📖'}</span>
-      <h2>${e.title}</h2>
-      <span class="rating">${'★'.repeat(e.rating)}${'☆'.repeat(5-e.rating)} ${e.rating}.0</span>
-    </div>
-    <div class="detail-section">
-      <h4>by ${e.author}</h4>
-      <p>${e.desc}</p>
-    </div>
-    <div class="detail-actions">
-      <button>♥ ${e.likes}</button>
-      <button>💬 댓글</button>
-    </div>
-  `;
-  showScreen('detail');
-  document.getElementById('bottomNav').style.display='none';
-}
-
-// ===== SEARCH =====
-function doSearch(query) {
-  const results = document.getElementById('searchResults');
-  const empty = document.getElementById('searchEmpty');
-  if(!query.trim()) {
-    results.style.display='none';
-    empty.style.display='flex';
-    return;
-  }
-  const q = query.toLowerCase();
-  const found = records.filter(r=>
-    r.title.toLowerCase().includes(q) || 
-    r.category.toLowerCase().includes(q) ||
-    r.review.toLowerCase().includes(q)
   );
-  if(found.length===0) {
-    results.style.display='none';
-    empty.style.display='flex';
-    return;
-  }
-  empty.style.display='none';
-  results.style.display='block';
-  results.innerHTML = found.map(r=>`
-    <div class="list-item" onclick="openDetail(records.find(x=>x.id===${r.id}))">
-      <div class="color-dot" style="background:${r.color}"></div>
-      <div class="item-info">
-        <div class="item-title">${r.title}</div>
-        <div class="item-meta">${r.category} · ${r.date}</div>
-      </div>
-      <div class="item-rating">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
-    </div>
-  `).join('');
-}
+};
 
-// ===== ADD MODAL =====
-function openAddModal() {
-  document.getElementById('addModal').classList.add('show');
-}
-function closeAddModal(e) {
-  if(e.target===e.currentTarget) {
-    document.getElementById('addModal').classList.remove('show');
-  }
-}
-function submitRecord() {
-  const title = document.getElementById('addTitle').value.trim();
-  const category = document.getElementById('addCategory').value;
-  const rating = parseInt(document.getElementById('addRating').value);
-  const review = document.getElementById('addReview').value.trim();
-  if(!title) { alert('작품명을 입력하세요'); return; }
-  const today = new Date().toISOString().split('T')[0];
-  const newRec = {
-    id: Date.now(),
-    title, category, date:today, rating,
-    review: review || '기록 없음',
-    color: categoryColors[category] || 'var(--color-blue)'
+/* ========================================
+  MAIN APP
+  ========================================
+*/
+const App = () => {
+  const [user, setUser] = useState(null);
+  const [books, setBooks] = useState([]);
+  const [currentTab, setCurrentTab] = useState('library');
+  const [screen, setScreen] = useState('login'); // login, main, otherLibrary
+  const [isWriting, setIsWriting] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [visitingUser, setVisitingUser] = useState(null);
+
+  // Load Initial State
+  useEffect(() => {
+    const savedUser = localStorage.getItem('artchieve_user_v2');
+    const savedBooks = localStorage.getItem('artchieve_books_v2');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+      setScreen('main');
+    }
+    if (savedBooks) setBooks(JSON.parse(savedBooks));
+  }, []);
+
+  useEffect(() => {
+    if(user) localStorage.setItem('artchieve_user_v2', JSON.stringify(user));
+  }, [user]);
+
+  useEffect(() => {
+    localStorage.setItem('artchieve_books_v2', JSON.stringify(books));
+  }, [books]);
+
+  const handleLogin = (userData) => {
+    setUser(userData);
+    setScreen('main');
   };
-  records.unshift(newRec);
-  renderBookshelf();
-  renderList();
-  renderCalendar();
-  renderStats();
-  // Reset form
-  document.getElementById('addTitle').value='';
-  document.getElementById('addReview').value='';
-  document.getElementById('addModal').classList.remove('show');
-}
 
-// ===== INIT =====
-document.addEventListener('DOMContentLoaded', ()=>{
-  // Pre-render for when login completes
-  setTimeout(()=>{
-    renderBookshelf();
-    renderList();
-    renderCalendar();
-    renderStats();
-    renderExplore();
-  }, 500);
-});
-</script>
-</body>
-</html>
+  const handleBookSave = (newBook) => {
+    setBooks([newBook, ...books]);
+    setIsWriting(false);
+    
+    // Level Up Check Logic (Simulated)
+    const newLevel = LEVEL_THRESHOLDS.findIndex(th => (books.length + 1) < th) || LEVEL_THRESHOLDS.length;
+    const oldLevel = LEVEL_THRESHOLDS.findIndex(th => books.length < th) || LEVEL_THRESHOLDS.length;
+    if (newLevel > oldLevel) {
+      alert(`🎉 레벨 업! Lv.${newLevel}이 되었습니다!`);
+    }
+  };
+
+  const handleFollow = (userId) => {
+    if (user.following.includes(userId)) return;
+    setUser({ ...user, following: [...user.following, userId] });
+  };
+
+  const handleVisitUser = (targetUser) => {
+    setVisitingUser(targetUser);
+    setScreen('otherLibrary');
+  };
+
+  const currentTheme = user ? THEMES[user.theme || 'classic'] : THEMES['classic'];
+
+  if (screen === 'login') return <Login onLogin={handleLogin} />;
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500&family=Playfair+Display:wght@500;600;700&display=swap');
+        .writing-vertical { writing-mode: vertical-rl; text-orientation: mixed; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .perspective-shelf { perspective: 1000px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+      `}</style>
+
+      <div className="font-sans antialiased h-screen w-full overflow-hidden relative" 
+           style={{ backgroundColor: currentTheme.bg, color: currentTheme.text }}>
+        
+        {screen === 'main' && (
+          <div className="h-full pb-20">
+            {currentTab === 'library' && (
+              <LibraryView 
+                user={user} 
+                books={books} 
+                onWrite={() => setIsWriting(true)} 
+                onSelectBook={setSelectedBook}
+                onOpenSettings={() => setIsSettingsOpen(true)}
+              />
+            )}
+            {currentTab === 'community' && (
+              <CommunityView 
+                currentUser={user} 
+                onFollow={handleFollow}
+                onVisitUser={handleVisitUser}
+                currentTheme={currentTheme}
+              />
+            )}
+            {currentTab === 'stats' && (
+              <StatsView books={books} user={user} currentTheme={currentTheme} />
+            )}
+            <BottomNav currentTab={currentTab} onTabChange={setCurrentTab} theme={currentTheme} />
+          </div>
+        )}
+
+        {screen === 'otherLibrary' && visitingUser && (
+          <OtherLibraryView 
+            targetUser={visitingUser} 
+            onBack={() => setScreen('main')} 
+            currentTheme={currentTheme}
+          />
+        )}
+
+        {isWriting && <WriteMode onCancel={() => setIsWriting(false)} onSave={handleBookSave} />}
+        {selectedBook && <BookDetail book={selectedBook} onClose={() => setSelectedBook(null)} />}
+        {isSettingsOpen && <SettingsModal user={user} onClose={() => setIsSettingsOpen(false)} onUpdate={setUser} />}
+      </div>
+    </>
+  );
+};
+
+export default App;
