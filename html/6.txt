@@ -1,0 +1,93 @@
+<svg width="375" height="812" viewBox="0 0 375 812" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="375" height="812" fill="#1A1612"/>
+  
+  <!-- Header -->
+  <rect width="375" height="72" fill="#1A1612"/>
+  <line x1="0" y1="72" x2="375" y2="72" stroke="rgba(255,255,255,0.04)"/>
+  
+  <!-- User Avatar (Gradient Circle) -->
+  <defs>
+    <linearGradient id="avatar-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#C8A55C"/>
+      <stop offset="100%" style="stop-color:#D4764E"/>
+    </linearGradient>
+  </defs>
+  <circle cx="44" cy="32" r="20" fill="url(#avatar-grad)"/>
+  <text x="44" y="38" font-size="19" text-anchor="middle">🦉</text>
+  
+  <!-- Library Name -->
+  <text x="76" y="30" font-family="Noto Serif KR" font-size="16" font-weight="600" fill="#F0E6D6">새벽 2시의 기록 보관소</text>
+  <text x="76" y="48" font-family="Pretendard" font-size="11.5" fill="#C8A55C">⭐ Lv.3 · 나무 책장</text>
+  
+  <!-- Search Icon Button -->
+  <circle cx="337" cy="32" r="19" fill="transparent" stroke="rgba(255,255,255,0.06)"/>
+  <text x="337" y="38" font-size="18" text-anchor="middle">🔍</text>
+  
+  <!-- View Tabs -->
+  <rect x="20" y="84" width="70" height="28" rx="14" fill="#C8A55C"/>
+  <text x="55" y="103" font-family="Pretendard" font-size="12.5" font-weight="600" fill="#1A1612" text-anchor="middle">📚 책장</text>
+  
+  <rect x="98" y="84" width="82" height="28" rx="14" fill="transparent" stroke="rgba(255,255,255,0.06)"/>
+  <text x="139" y="103" font-family="Pretendard" font-size="12.5" fill="#6D6052" text-anchor="middle">📋 리스트</text>
+  
+  <rect x="188" y="84" width="92" height="28" rx="14" fill="transparent" stroke="rgba(255,255,255,0.06)"/>
+  <text x="234" y="103" font-family="Pretendard" font-size="12.5" fill="#6D6052" text-anchor="middle">📅 캘린더</text>
+  
+  <rect x="288" y="84" width="74" height="28" rx="14" fill="transparent" stroke="rgba(255,255,255,0.06)"/>
+  <text x="325" y="103" font-family="Pretendard" font-size="12.5" fill="#6D6052" text-anchor="middle">📊 쌓기</text>
+  
+  <!-- Shelf Section Label -->
+  <text x="20" y="138" font-family="Pretendard" font-size="11" fill="#6D6052" letter-spacing="1">최근 기록</text>
+  
+  <!-- Book Spines (Sample) -->
+  <rect x="32" y="190" width="28" height="120" rx="3" fill="#5A7A9A"/>
+  <line x1="32" y1="190" x2="32" y2="310" stroke="rgba(0,0,0,0.2)" stroke-width="3"/>
+  <line x1="60" y1="195" x2="60" y2="305" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  
+  <rect x="66" y="175" width="34" height="135" rx="3" fill="#B5606A"/>
+  <line x1="66" y1="175" x2="66" y2="310" stroke="rgba(0,0,0,0.2)" stroke-width="3"/>
+  <line x1="100" y1="180" x2="100" y2="305" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  
+  <rect x="106" y="185" width="26" height="125" rx="3" fill="#C8A55C"/>
+  <line x1="106" y1="185" x2="106" y2="310" stroke="rgba(0,0,0,0.2)" stroke-width="3"/>
+  <line x1="132" y1="190" x2="132" y2="305" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  
+  <rect x="138" y="195" width="22" height="115" rx="3" fill="#D4764E"/>
+  <line x1="138" y1="195" x2="138" y2="310" stroke="rgba(0,0,0,0.2)" stroke-width="3"/>
+  <line x1="160" y1="200" x2="160" y2="305" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  
+  <rect x="166" y="190" width="20" height="120" rx="3" fill="#6A8A6A"/>
+  <line x1="166" y1="190" x2="166" y2="310" stroke="rgba(0,0,0,0.2)" stroke-width="3"/>
+  <line x1="186" y1="195" x2="186" y2="305" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  
+  <!-- Shelf Base -->
+  <defs>
+    <linearGradient id="shelf-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3D3228"/>
+      <stop offset="100%" style="stop-color:#2E2620"/>
+    </linearGradient>
+  </defs>
+  <rect x="12" y="322" width="351" height="12" rx="4" fill="url(#shelf-grad)"/>
+  
+  <!-- Bottom Nav -->
+  <rect y="748" width="375" height="64" fill="rgba(26,22,18,0.95)"/>
+  <line x1="0" y1="748" x2="375" y2="748" stroke="rgba(255,255,255,0.06)"/>
+  
+  <!-- Nav Items -->
+  <text x="37.5" y="773" font-size="21" text-anchor="middle">📚</text>
+  <text x="37.5" y="794" font-family="Pretendard" font-size="9.5" fill="#C8A55C" text-anchor="middle" letter-spacing="0.5">서재</text>
+  
+  <text x="112.5" y="773" font-size="21" text-anchor="middle">🔭</text>
+  <text x="112.5" y="794" font-family="Pretendard" font-size="9.5" fill="#6D6052" text-anchor="middle" letter-spacing="0.5">탐색</text>
+  
+  <!-- Add Button (Floating) -->
+  <circle cx="187.5" cy="732" r="24" fill="#C8A55C"/>
+  <text x="187.5" y="742" font-size="26" fill="#1A1612" text-anchor="middle">+</text>
+  
+  <text x="262.5" y="773" font-size="21" text-anchor="middle">📊</text>
+  <text x="262.5" y="794" font-family="Pretendard" font-size="9.5" fill="#6D6052" text-anchor="middle" letter-spacing="0.5">통계</text>
+  
+  <text x="337.5" y="773" font-size="21" text-anchor="middle">🔍</text>
+  <text x="337.5" y="794" font-family="Pretendard" font-size="9.5" fill="#6D6052" text-anchor="middle" letter-spacing="0.5">검색</text>
+</svg>

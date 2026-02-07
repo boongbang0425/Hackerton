@@ -1,0 +1,35 @@
+<svg width="375" height="812" viewBox="0 0 375 812" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="375" height="812" fill="#1A1612"/>
+  
+  <!-- Title -->
+  <text x="187.5" y="300" font-family="Noto Serif KR" font-size="29" font-weight="700" fill="#F0E6D6" text-anchor="middle">서재에 입장하기</text>
+  
+  <!-- Subtitle -->
+  <text x="187.5" y="328" font-family="Pretendard" font-size="14" fill="#A89882" text-anchor="middle">소셜 로그인 또는 이메일로 시작하세요</text>
+  
+  <!-- Google Button -->
+  <rect x="32" y="360" width="311" height="48" rx="12" fill="#312B25" stroke="rgba(255,255,255,0.08)"/>
+  <text x="110" y="389" font-family="Pretendard" font-size="15" fill="#F0E6D6">🔵 Google로 시작하기</text>
+  
+  <!-- Kakao Button -->
+  <rect x="32" y="420" width="311" height="48" rx="12" fill="#312B25" stroke="rgba(255,255,255,0.08)"/>
+  <text x="110" y="449" font-family="Pretendard" font-size="15" fill="#F0E6D6">💬 카카오로 시작하기</text>
+  
+  <!-- Divider -->
+  <line x1="32" y1="496" x2="165" y2="496" stroke="rgba(255,255,255,0.06)"/>
+  <text x="187.5" y="500" font-family="Pretendard" font-size="13" fill="#6D6052" text-anchor="middle">또는</text>
+  <line x1="210" y1="496" x2="343" y2="496" stroke="rgba(255,255,255,0.06)"/>
+  
+  <!-- Email Input -->
+  <rect x="32" y="520" width="311" height="46" rx="12" fill="#312B25" stroke="rgba(255,255,255,0.08)"/>
+  <text x="48" y="548" font-family="Pretendard" font-size="14" fill="#6D6052">이메일 주소</text>
+  
+  <!-- Password Input -->
+  <rect x="32" y="578" width="311" height="46" rx="12" fill="#312B25" stroke="rgba(255,255,255,0.08)"/>
+  <text x="48" y="606" font-family="Pretendard" font-size="14" fill="#6D6052">비밀번호</text>
+  
+  <!-- Primary Button -->
+  <rect x="32" y="644" width="311" height="48" rx="12" fill="#C8A55C"/>
+  <text x="187.5" y="673" font-family="Pretendard" font-size="15" font-weight="600" fill="#1A1612" text-anchor="middle">이메일로 시작하기</text>
+</svg>

@@ -1,0 +1,91 @@
+<svg width="375" height="812" viewBox="0 0 375 812" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="375" height="812" fill="#1A1612"/>
+  
+  <!-- Header -->
+  <rect width="375" height="72" fill="#1A1612"/>
+  <line x1="0" y1="72" x2="375" y2="72" stroke="rgba(255,255,255,0.04)"/>
+  
+  <defs>
+    <linearGradient id="avatar-grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#C8A55C"/>
+      <stop offset="100%" style="stop-color:#D4764E"/>
+    </linearGradient>
+  </defs>
+  <circle cx="44" cy="32" r="20" fill="url(#avatar-grad3)"/>
+  <text x="44" y="38" font-size="19" text-anchor="middle">🦉</text>
+  
+  <text x="76" y="30" font-family="Noto Serif KR" font-size="16" font-weight="600" fill="#F0E6D6">새벽 2시의 기록 보관소</text>
+  <text x="76" y="48" font-family="Pretendard" font-size="11.5" fill="#C8A55C">⭐ Lv.3 · 나무 책장</text>
+  
+  <circle cx="337" cy="32" r="19" fill="transparent" stroke="rgba(255,255,255,0.06)"/>
+  <text x="337" y="38" font-size="18" text-anchor="middle">🔍</text>
+  
+  <!-- View Tabs -->
+  <rect x="188" y="84" width="92" height="28" rx="14" fill="#C8A55C"/>
+  <text x="234" y="103" font-family="Pretendard" font-size="12.5" font-weight="600" fill="#1A1612" text-anchor="middle">📅 캘린더</text>
+  
+  <!-- Calendar Header -->
+  <text x="20" y="152" font-family="Noto Serif KR" font-size="19" font-weight="600" fill="#F0E6D6">2026년 2월</text>
+  
+  <!-- Nav Buttons -->
+  <circle cx="318" cy="144" r="16" fill="transparent" stroke="rgba(255,255,255,0.08)"/>
+  <text x="318" y="150" font-size="13" fill="#A89882" text-anchor="middle">◀</text>
+  
+  <circle cx="347" cy="144" r="16" fill="transparent" stroke="rgba(255,255,255,0.08)"/>
+  <text x="347" y="150" font-size="13" fill="#A89882" text-anchor="middle">▶</text>
+  
+  <!-- Day Names -->
+  <text x="37" y="190" font-family="Pretendard" font-size="10.5" fill="#6D6052" text-anchor="middle">일</text>
+  <text x="82" y="190" font-family="Pretendard" font-size="10.5" fill="#6D6052" text-anchor="middle">월</text>
+  <text x="127" y="190" font-family="Pretendard" font-size="10.5" fill="#6D6052" text-anchor="middle">화</text>
+  <text x="172" y="190" font-family="Pretendard" font-size="10.5" fill="#6D6052" text-anchor="middle">수</text>
+  <text x="217" y="190" font-family="Pretendard" font-size="10.5" fill="#6D6052" text-anchor="middle">목</text>
+  <text x="262" y="190" font-family="Pretendard" font-size="10.5" fill="#6D6052" text-anchor="middle">금</text>
+  <text x="307" y="190" font-family="Pretendard" font-size="10.5" fill="#6D6052" text-anchor="middle">토</text>
+  
+  <!-- Calendar Grid (Sample - Week 1) -->
+  <!-- Empty cells for starting day -->
+  
+  <!-- Day 1 with entry -->
+  <rect x="68" y="205" width="43" height="43" rx="6" fill="transparent"/>
+  <text x="89.5" y="232" font-family="Pretendard" font-size="13" font-weight="600" fill="#F0E6D6" text-anchor="middle">1</text>
+  <circle cx="89.5" cy="240" r="3" fill="#C8A55C"/>
+  
+  <!-- Day 2 -->
+  <text x="134.5" y="232" font-family="Pretendard" font-size="13" fill="#A89882" text-anchor="middle">2</text>
+  
+  <!-- Day 3 with entry -->
+  <text x="179.5" y="232" font-family="Pretendard" font-size="13" font-weight="600" fill="#F0E6D6" text-anchor="middle">3</text>
+  <circle cx="179.5" cy="240" r="3" fill="#C8A55C"/>
+  
+  <!-- Day 4 -->
+  <text x="224.5" y="232" font-family="Pretendard" font-size="13" fill="#A89882" text-anchor="middle">4</text>
+  
+  <!-- Day 5 with entry -->
+  <text x="269.5" y="232" font-family="Pretendard" font-size="13" font-weight="600" fill="#F0E6D6" text-anchor="middle">5</text>
+  <circle cx="269.5" cy="240" r="3" fill="#C8A55C"/>
+  
+  <!-- Day 6 with entry -->
+  <text x="314.5" y="232" font-family="Pretendard" font-size="13" font-weight="600" fill="#F0E6D6" text-anchor="middle">6</text>
+  <circle cx="314.5" cy="240" r="3" fill="#C8A55C"/>
+  
+  <!-- Bottom Nav -->
+  <rect y="748" width="375" height="64" fill="rgba(26,22,18,0.95)"/>
+  <line x1="0" y1="748" x2="375" y2="748" stroke="rgba(255,255,255,0.06)"/>
+  
+  <text x="37.5" y="773" font-size="21" text-anchor="middle">📚</text>
+  <text x="37.5" y="794" font-family="Pretendard" font-size="9.5" fill="#C8A55C" text-anchor="middle">서재</text>
+  
+  <text x="112.5" y="773" font-size="21" text-anchor="middle">🔭</text>
+  <text x="112.5" y="794" font-family="Pretendard" font-size="9.5" fill="#6D6052" text-anchor="middle">탐색</text>
+  
+  <circle cx="187.5" cy="732" r="24" fill="#C8A55C"/>
+  <text x="187.5" y="742" font-size="26" fill="#1A1612" text-anchor="middle">+</text>
+  
+  <text x="262.5" y="773" font-size="21" text-anchor="middle">📊</text>
+  <text x="262.5" y="794" font-family="Pretendard" font-size="9.5" fill="#6D6052" text-anchor="middle">통계</text>
+  
+  <text x="337.5" y="773" font-size="21" text-anchor="middle">🔍</text>
+  <text x="337.5" y="794" font-family="Pretendard" font-size="9.5" fill="#6D6052" text-anchor="middle">검색</text>
+</svg>

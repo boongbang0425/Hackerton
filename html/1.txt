@@ -1,0 +1,36 @@
+<svg width="375" height="812" viewBox="0 0 375 812" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="375" height="812" fill="#1A1612"/>
+  
+  <!-- Title -->
+  <text x="187.5" y="300" font-family="Noto Serif KR" font-size="35" font-weight="700" fill="#F0E6D6" text-anchor="middle">당신의 예술 서재를</text>
+  <text x="187.5" y="340" font-family="Noto Serif KR" font-size="35" font-weight="700" fill="#F0E6D6" text-anchor="middle">만들어보세요</text>
+  
+  <!-- Subtitle -->
+  <text x="187.5" y="375" font-family="Pretendard" font-size="15" font-weight="300" fill="#A89882" text-anchor="middle">기록하고, 수집하고, 전시하는 공간</text>
+  
+  <!-- Icon Grid (7 circles) -->
+  <circle cx="80" cy="440" r="26" fill="rgba(200,165,92,0.05)" stroke="rgba(200,165,92,0.2)" stroke-width="2"/>
+  <text x="80" y="450" font-size="22" text-anchor="middle">🎬</text>
+  
+  <circle cx="140" cy="440" r="26" fill="rgba(200,165,92,0.05)" stroke="rgba(200,165,92,0.2)" stroke-width="2"/>
+  <text x="140" y="450" font-size="22" text-anchor="middle">🎭</text>
+  
+  <circle cx="200" cy="440" r="26" fill="rgba(200,165,92,0.05)" stroke="rgba(200,165,92,0.2)" stroke-width="2"/>
+  <text x="200" y="450" font-size="22" text-anchor="middle">🎨</text>
+  
+  <circle cx="260" cy="440" r="26" fill="rgba(200,165,92,0.05)" stroke="rgba(200,165,92,0.2)" stroke-width="2"/>
+  <text x="260" y="450" font-size="22" text-anchor="middle">💃</text>
+  
+  <circle cx="110" cy="510" r="26" fill="rgba(200,165,92,0.05)" stroke="rgba(200,165,92,0.2)" stroke-width="2"/>
+  <text x="110" y="520" font-size="22" text-anchor="middle">🏛️</text>
+  
+  <circle cx="187.5" cy="510" r="26" fill="rgba(200,165,92,0.05)" stroke="rgba(200,165,92,0.2)" stroke-width="2"/>
+  <text x="187.5" y="520" font-size="22" text-anchor="middle">📖</text>
+  
+  <circle cx="265" cy="510" r="26" fill="rgba(200,165,92,0.05)" stroke="rgba(200,165,92,0.2)" stroke-width="2"/>
+  <text x="265" y="520" font-size="22" text-anchor="middle">🎵</text>
+  
+  <!-- CTA Text -->
+  <text x="187.5" y="600" font-family="Pretendard" font-size="14" fill="#6D6052" text-anchor="middle">화면을 터치하여 시작하기</text>
+</svg>

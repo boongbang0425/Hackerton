@@ -1,0 +1,9 @@
+<svg width="375" height="812" viewBox="0 0 375 812" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Blurred Background -->
+  <rect width="375" height="812" fill="rgba(26,22,18,0.85)"/>
+  
+  <!-- Flying Book (Vertical) -->
+  <rect x="172.5" y="336" width="30" height="140" rx="3" fill="#C8A55C"/>
+  <line x1="172.5" y1="336" x2="172.5" y2="476" stroke="rgba(0,0,0,0.2)" stroke-width="3"/>
+  <line x1="202.5" y1="341" x2="202.5" y2="471" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+</svg>

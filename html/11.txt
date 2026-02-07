@@ -1,0 +1,97 @@
+<svg width="375" height="812" viewBox="0 0 375 812" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="375" height="812" fill="#1A1612"/>
+  
+  <!-- Header -->
+  <rect width="375" height="64" fill="#1A1612"/>
+  <line x1="0" y1="64" x2="375" y2="64" stroke="rgba(255,255,255,0.04)"/>
+  
+  <!-- Back Button -->
+  <text x="20" y="38" font-size="21" fill="#A89882">←</text>
+  
+  <!-- Title -->
+  <text x="187.5" y="38" font-family="Noto Serif KR" font-size="21" font-weight="700" fill="#F0E6D6" text-anchor="middle">📊 나의 예술 통계</text>
+  
+  <!-- Card 1: Radar Chart -->
+  <rect x="20" y="84" width="335" height="220" rx="12" fill="#312B25" stroke="rgba(255,255,255,0.04)"/>
+  <text x="32" y="104" font-family="Pretendard" font-size="11.5" fill="#C8A55C" letter-spacing="1">예술 성향 레이더</text>
+  
+  <!-- Radar Chart Placeholder (Pentagon) -->
+  <polygon points="187.5,140 237,170 220,220 155,220 138,170" fill="rgba(200,165,92,0.15)" stroke="#C8A55C" stroke-width="2"/>
+  <circle cx="187.5" cy="140" r="4" fill="#C8A55C"/>
+  <circle cx="237" cy="170" r="4" fill="#C8A55C"/>
+  <circle cx="220" cy="220" r="4" fill="#C8A55C"/>
+  <circle cx="155" cy="220" r="4" fill="#C8A55C"/>
+  <circle cx="138" cy="170" r="4" fill="#C8A55C"/>
+  
+  <!-- Labels -->
+  <text x="187.5" y="130" font-family="Pretendard" font-size="11" fill="#A89882" text-anchor="middle">🎬 3</text>
+  <text x="250" y="175" font-family="Pretendard" font-size="11" fill="#A89882">🎭 1</text>
+  <text x="230" y="235" font-family="Pretendard" font-size="11" fill="#A89882">🎨 1</text>
+  <text x="135" y="235" font-family="Pretendard" font-size="11" fill="#A89882" text-anchor="end">📖 3</text>
+  <text x="125" y="175" font-family="Pretendard" font-size="11" fill="#A89882" text-anchor="end">🎵 2</text>
+  
+  <!-- Card 2: Monthly Chart -->
+  <rect x="20" y="320" width="335" height="180" rx="12" fill="#312B25" stroke="rgba(255,255,255,0.04)"/>
+  <text x="32" y="340" font-family="Pretendard" font-size="11.5" fill="#C8A55C" letter-spacing="1">월별 기록 추이</text>
+  
+  <!-- Bar Chart (Sample) -->
+  <defs>
+    <linearGradient id="bar-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#C8A55C"/>
+      <stop offset="100%" style="stop-color:rgba(200,165,92,0.3)"/>
+    </linearGradient>
+  </defs>
+  
+  <rect x="35" y="410" width="16" height="40" rx="2" fill="url(#bar-grad)"/>
+  <text x="43" y="465" font-family="Pretendard" font-size="8.8" fill="#6D6052" text-anchor="middle">1월</text>
+  
+  <rect x="60" y="420" width="16" height="30" rx="2" fill="url(#bar-grad)"/>
+  <text x="68" y="465" font-family="Pretendard" font-size="8.8" fill="#6D6052" text-anchor="middle">2월</text>
+  
+  <rect x="85" y="435" width="16" height="15" rx="2" fill="url(#bar-grad)"/>
+  <text x="93" y="465" font-family="Pretendard" font-size="8.8" fill="#6D6052" text-anchor="middle">3월</text>
+  
+  <rect x="110" y="440" width="16" height="10" rx="2" fill="url(#bar-grad)"/>
+  <text x="118" y="465" font-family="Pretendard" font-size="8.8" fill="#6D6052" text-anchor="middle">4월</text>
+  
+  <!-- Card 3: Collection -->
+  <rect x="20" y="516" width="335" height="180" rx="12" fill="#312B25" stroke="rgba(255,255,255,0.04)"/>
+  <text x="32" y="536" font-family="Pretendard" font-size="11.5" fill="#C8A55C" letter-spacing="1">사서 도감</text>
+  
+  <!-- Collection Grid (4x2) -->
+  <rect x="40" y="555" width="48" height="48" rx="6" fill="var(--bg-card)" stroke="rgba(255,255,255,0.08)"/>
+  <text x="64" y="585" font-size="21" text-anchor="middle">🦉</text>
+  <text x="64" y="620" font-family="Pretendard" font-size="9.5" fill="#A89882" text-anchor="middle">올빼미</text>
+  
+  <rect x="104" y="555" width="48" height="48" rx="6" fill="var(--bg-card)" stroke="rgba(255,255,255,0.08)"/>
+  <text x="128" y="585" font-size="21" text-anchor="middle">🐱</text>
+  <text x="128" y="620" font-family="Pretendard" font-size="9.5" fill="#A89882" text-anchor="middle">고양이</text>
+  
+  <rect x="168" y="555" width="48" height="48" rx="6" fill="var(--bg-card)" stroke="rgba(255,255,255,0.08)"/>
+  <text x="192" y="585" font-size="21" text-anchor="middle">🦊</text>
+  <text x="192" y="620" font-family="Pretendard" font-size="9.5" fill="#A89882" text-anchor="middle">여우</text>
+  
+  <rect x="232" y="555" width="48" height="48" rx="6" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)"/>
+  <text x="256" y="585" font-size="21" text-anchor="middle" opacity="0.3">🐻</text>
+  <text x="256" y="620" font-family="Pretendard" font-size="9.5" fill="#A89882" text-anchor="middle">???</text>
+  
+  <!-- Bottom Nav -->
+  <rect y="748" width="375" height="64" fill="rgba(26,22,18,0.95)"/>
+  <line x1="0" y1="748" x2="375" y2="748" stroke="rgba(255,255,255,0.06)"/>
+  
+  <text x="37.5" y="773" font-size="21" text-anchor="middle">📚</text>
+  <text x="37.5" y="794" font-family="Pretendard" font-size="9.5" fill="#6D6052" text-anchor="middle">서재</text>
+  
+  <text x="112.5" y="773" font-size="21" text-anchor="middle">🔭</text>
+  <text x="112.5" y="794" font-family="Pretendard" font-size="9.5" fill="#6D6052" text-anchor="middle">탐색</text>
+  
+  <circle cx="187.5" cy="732" r="24" fill="#C8A55C"/>
+  <text x="187.5" y="742" font-size="26" fill="#1A1612" text-anchor="middle">+</text>
+  
+  <text x="262.5" y="773" font-size="21" text-anchor="middle">📊</text>
+  <text x="262.5" y="794" font-family="Pretendard" font-size="9.5" fill="#C8A55C" text-anchor="middle">통계</text>
+  
+  <text x="337.5" y="773" font-size="21" text-anchor="middle">🔍</text>
+  <text x="337.5" y="794" font-family="Pretendard" font-size="9.5" fill="#6D6052" text-anchor="middle">검색</text>
+</svg>
