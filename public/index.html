@@ -1,0 +1,2553 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>예술 서재 — Art Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Pretendard:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #1a1612;
+  --bg-secondary: #231f1a;
+  --bg-shelf: #2a2420;
+  --bg-card: #312b25;
+  --text-primary: #f0e6d6;
+  --text-secondary: #a89882;
+  --text-muted: #6d6052;
+  --accent-gold: #c8a55c;
+  --accent-warm: #d4764e;
+  --accent-rose: #b5606a;
+  --accent-blue: #5a7a9a;
+  --accent-green: #6a8a6a;
+  --accent-purple: #7a6a9a;
+  --accent-teal: #5a8a8a;
+  --shelf-wood: #3d3228;
+  --shelf-shadow: rgba(0,0,0,0.5);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --font-serif: 'Noto Serif KR', 'Playfair Display', serif;
+  --font-sans: 'Pretendard', -apple-system, sans-serif;
+  --shadow-book: 2px 4px 12px rgba(0,0,0,0.4);
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+/* ====== SCREENS ====== */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1;
+}
+.screen.active { display: flex; z-index: 10; }
+
+/* ====== SPLASH SCREEN ====== */
+#splash {
+  background: var(--bg-primary);
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.splash-content {
+  text-align: center;
+  opacity: 0;
+  animation: fadeUp 1s ease forwards 0.3s;
+}
+
+.splash-title {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.splash-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 2.5rem;
+  font-weight: 300;
+}
+
+.art-icons {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+}
+
+.art-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  opacity: 0;
+  transform: translateY(20px) scale(0.8);
+  animation: iconPop 0.5s ease forwards;
+  border: 2px solid rgba(200,165,92,0.2);
+  background: rgba(200,165,92,0.05);
+  transition: var(--transition);
+}
+.art-icon:hover {
+  transform: scale(1.15) !important;
+  border-color: var(--accent-gold);
+  background: rgba(200,165,92,0.15);
+}
+.art-icon:nth-child(1) { animation-delay: 0.6s; }
+.art-icon:nth-child(2) { animation-delay: 0.75s; }
+.art-icon:nth-child(3) { animation-delay: 0.9s; }
+.art-icon:nth-child(4) { animation-delay: 1.05s; }
+.art-icon:nth-child(5) { animation-delay: 1.2s; }
+.art-icon:nth-child(6) { animation-delay: 1.35s; }
+.art-icon:nth-child(7) { animation-delay: 1.5s; }
+
+.splash-cta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 2s;
+}
+
+/* ====== AUTH SCREEN ====== */
+#auth {
+  background: var(--bg-primary);
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.auth-box {
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+
+.auth-title {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.auth-desc {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+}
+
+.social-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  transition: var(--transition);
+}
+.social-btn:hover {
+  background: var(--bg-shelf);
+  border-color: var(--accent-gold);
+  transform: translateY(-1px);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+}
+
+.input-field {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: var(--font-sans);
+  margin-bottom: 0.75rem;
+  outline: none;
+  transition: var(--transition);
+}
+.input-field:focus {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(200,165,92,0.1);
+}
+.input-field::placeholder { color: var(--text-muted); }
+
+.primary-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--accent-gold);
+  color: var(--bg-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 0.5rem;
+}
+.primary-btn:hover {
+  background: #d4b06a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(200,165,92,0.3);
+}
+
+/* ====== ONBOARDING SCREEN ====== */
+#onboarding {
+  background: var(--bg-primary);
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.onboard-box {
+  width: 100%;
+  max-width: 420px;
+}
+
+.onboard-step {
+  display: none;
+  animation: fadeUp 0.4s ease;
+}
+.onboard-step.active { display: block; }
+
+.onboard-label {
+  font-size: 0.75rem;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.6rem;
+}
+
+.onboard-heading {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.character-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.character-card {
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  border: 2px solid rgba(255,255,255,0.06);
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  gap: 0.5rem;
+}
+.character-card:hover, .character-card.selected {
+  border-color: var(--accent-gold);
+  background: rgba(200,165,92,0.08);
+  transform: translateY(-2px);
+}
+.character-card .char-emoji { font-size: 2rem; }
+.character-card .char-name {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.progress-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: var(--transition);
+}
+.dot.active {
+  background: var(--accent-gold);
+  width: 24px;
+  border-radius: 4px;
+}
+
+/* ====== MAIN DASHBOARD ====== */
+#dashboard {
+  background: var(--bg-primary);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dash-header {
+  padding: 1rem 1.25rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: var(--bg-primary);
+  z-index: 20;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.dash-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-gold), var(--accent-warm));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.user-info .library-name {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 600;
+}
+.user-info .library-level {
+  font-size: 0.72rem;
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.dash-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: transparent;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: var(--transition);
+}
+.icon-btn:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  background: rgba(200,165,92,0.06);
+}
+
+/* View Tabs */
+.view-tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.75rem 1.25rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.view-tabs::-webkit-scrollbar { display: none; }
+
+.view-tab {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+.view-tab:hover { color: var(--text-secondary); }
+.view-tab.active {
+  background: var(--accent-gold);
+  color: var(--bg-primary);
+  border-color: var(--accent-gold);
+  font-weight: 600;
+}
+
+/* Bookshelf View */
+.bookshelf-view {
+  padding: 0 1.25rem 6rem;
+}
+
+.shelf-section {
+  margin-bottom: 0.5rem;
+}
+
+.shelf-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.75rem 0 0.5rem;
+}
+
+.shelf-row {
+  position: relative;
+  min-height: 160px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 0 12px 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.shelf-row::-webkit-scrollbar { display: none; }
+
+.shelf-base {
+  position: relative;
+  padding-bottom: 12px;
+  margin-bottom: 1rem;
+}
+.shelf-base::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -0.5rem;
+  right: -0.5rem;
+  height: 12px;
+  background: linear-gradient(180deg, var(--shelf-wood), #2e2620);
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 8px var(--shelf-shadow), inset 0 2px 0 rgba(255,255,255,0.04);
+}
+
+.book-spine {
+  flex-shrink: 0;
+  border-radius: 2px 4px 4px 2px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.85);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  box-shadow: var(--shadow-book);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  padding: 8px 0;
+  letter-spacing: 0.03em;
+  overflow: hidden;
+}
+.book-spine::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: rgba(0,0,0,0.2);
+}
+.book-spine::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 5%;
+  bottom: 5%;
+  width: 1px;
+  background: rgba(255,255,255,0.08);
+}
+.book-spine:hover {
+  transform: translateY(-8px);
+  box-shadow: 2px 8px 20px rgba(0,0,0,0.5);
+  z-index: 5;
+}
+
+.book-spine .spine-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+/* List View */
+.list-view {
+  padding: 0 1.25rem 6rem;
+  display: none;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.list-item:hover { background: rgba(255,255,255,0.02); }
+
+.list-color-bar {
+  width: 4px;
+  height: 48px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.list-info { flex: 1; }
+.list-info .list-title {
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 0.2rem;
+}
+.list-info .list-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.list-rating {
+  color: var(--accent-gold);
+  font-size: 0.85rem;
+}
+
+/* Calendar View */
+.calendar-view {
+  padding: 0 1.25rem 6rem;
+  display: none;
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+}
+
+.cal-month {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.cal-nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.cal-nav button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+.cal-nav button:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-day-name {
+  text-align: center;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  padding: 0.5rem 0;
+  text-transform: uppercase;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  position: relative;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.cal-day:hover { background: rgba(255,255,255,0.04); }
+.cal-day.has-entry { color: var(--text-primary); font-weight: 600; }
+.cal-day.has-entry::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  position: absolute;
+  bottom: 4px;
+}
+.cal-day.empty { opacity: 0; pointer-events: none; }
+
+/* Stack View */
+.stack-view {
+  padding: 1rem 1.25rem 6rem;
+  display: none;
+}
+
+.stacks-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 50vh;
+  padding: 1rem 0;
+}
+
+.stack-col {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+}
+
+.stack-book {
+  width: 90%;
+  max-width: 52px;
+  height: 10px;
+  border-radius: 1px;
+  transition: var(--transition);
+}
+.stack-book:hover { transform: scaleX(1.1); }
+
+.stack-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.stack-count {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-serif);
+}
+
+/* ====== BOTTOM NAV ====== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(26, 22, 18, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+}
+.nav-item .nav-icon { font-size: 1.3rem; }
+.nav-item .nav-label { font-size: 0.6rem; letter-spacing: 0.03em; }
+.nav-item:hover { color: var(--text-secondary); }
+.nav-item.active { color: var(--accent-gold); }
+
+.nav-add {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  color: var(--bg-primary);
+  border: none;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(200,165,92,0.3);
+  transition: var(--transition);
+  transform: translateY(-8px);
+}
+.nav-add:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 6px 24px rgba(200,165,92,0.45);
+}
+
+/* ====== WRITE SCREEN ====== */
+#write {
+  background: var(--bg-primary);
+  overflow-y: auto;
+}
+
+.write-header {
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  position: sticky;
+  top: 0;
+  background: var(--bg-primary);
+  z-index: 10;
+}
+
+.back-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: var(--transition);
+}
+.back-btn:hover { color: var(--accent-gold); }
+
+.write-title-text {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.write-body {
+  padding: 1.5rem 1.25rem 6rem;
+}
+
+.write-section {
+  margin-bottom: 2rem;
+}
+
+.write-label {
+  font-size: 0.72rem;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.75rem;
+}
+
+.category-selector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+}
+
+.cat-btn {
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  border: 1.5px solid rgba(255,255,255,0.06);
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-secondary);
+}
+.cat-btn:hover, .cat-btn.selected {
+  border-color: var(--accent-gold);
+  background: rgba(200,165,92,0.08);
+  color: var(--accent-gold);
+}
+.cat-btn .cat-emoji { font-size: 1.5rem; }
+.cat-btn .cat-name { font-size: 0.6rem; font-weight: 500; }
+
+.write-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: var(--transition);
+}
+.write-input:focus {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(200,165,92,0.08);
+}
+
+.write-textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: var(--font-sans);
+  outline: none;
+  resize: vertical;
+  line-height: 1.7;
+  transition: var(--transition);
+}
+.write-textarea:focus {
+  border-color: var(--accent-gold);
+}
+.write-textarea::placeholder { color: var(--text-muted); }
+
+/* Star Rating */
+.star-rating {
+  display: flex;
+  gap: 0.3rem;
+}
+.star {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+.star.active, .star:hover { color: var(--accent-gold); }
+
+/* Color Picker (Spine) */
+.color-picker-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.color-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: var(--transition);
+}
+.color-swatch:hover, .color-swatch.selected {
+  border-color: #fff;
+  transform: scale(1.15);
+}
+
+/* Pattern Picker */
+.pattern-row {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+.pattern-chip {
+  padding: 6px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.pattern-chip:hover, .pattern-chip.selected {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.tag-input-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-card);
+  min-height: 44px;
+  align-items: center;
+}
+.tag-chip {
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(200,165,92,0.15);
+  color: var(--accent-gold);
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.tag-chip .tag-remove {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: var(--transition);
+}
+.tag-chip .tag-remove:hover { opacity: 1; }
+.tag-input {
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  outline: none;
+  font-size: 0.85rem;
+  font-family: var(--font-sans);
+  flex: 1;
+  min-width: 80px;
+}
+.tag-input::placeholder { color: var(--text-muted); }
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+}
+.toggle-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+.toggle {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition);
+}
+.toggle::after {
+  content: '';
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: var(--transition);
+}
+.toggle.on {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+.toggle.on::after {
+  left: 22px;
+  background: var(--bg-primary);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--accent-gold);
+  color: var(--bg-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.submit-btn:hover {
+  background: #d4b06a;
+  box-shadow: 0 4px 20px rgba(200,165,92,0.3);
+}
+
+/* Ticket Upload */
+.ticket-upload {
+  display: none;
+  margin-top: 0.75rem;
+}
+.ticket-upload.visible { display: block; }
+.ticket-drop {
+  border: 2px dashed rgba(255,255,255,0.1);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.ticket-drop:hover {
+  border-color: var(--accent-gold);
+  color: var(--text-secondary);
+}
+
+/* ====== COMMUNITY SCREEN ====== */
+#community {
+  background: var(--bg-primary);
+  overflow-y: auto;
+}
+
+.community-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  position: sticky;
+  top: 0;
+  background: var(--bg-primary);
+  z-index: 10;
+}
+
+.community-title {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.filter-row {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.filter-row::-webkit-scrollbar { display: none; }
+
+.filter-chip {
+  padding: 6px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+.filter-chip:hover { color: var(--text-secondary); }
+.filter-chip.active {
+  background: var(--accent-gold);
+  color: var(--bg-primary);
+  border-color: var(--accent-gold);
+}
+
+.feed {
+  padding: 0.75rem 1.25rem 6rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.feed-card {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: var(--transition);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.feed-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  border-color: rgba(200,165,92,0.2);
+}
+
+.feed-cover {
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  position: relative;
+}
+.feed-cover::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, var(--bg-card));
+}
+
+.feed-info {
+  padding: 0.6rem 0.75rem 0.75rem;
+}
+.feed-info .feed-work-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.feed-info .feed-author {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+.feed-info .feed-excerpt {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.feed-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.75rem 0.6rem;
+}
+.feed-stars { font-size: 0.65rem; color: var(--accent-gold); }
+.feed-likes {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* ====== STATS SCREEN ====== */
+#stats {
+  background: var(--bg-primary);
+  overflow-y: auto;
+}
+
+.stats-header {
+  padding: 1.25rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.stats-title {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.stats-body {
+  padding: 1.25rem 1.25rem 6rem;
+}
+
+.stats-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.stats-card-title {
+  font-size: 0.72rem;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1rem;
+}
+
+/* Radar Chart */
+.radar-container {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+}
+.radar-svg { max-width: 260px; }
+
+/* Monthly Chart */
+.monthly-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 120px;
+  padding: 0.5rem 0;
+}
+.month-bar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+.bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, var(--accent-gold), rgba(200,165,92,0.3));
+  min-height: 4px;
+  transition: height 0.5s ease;
+}
+.month-label {
+  font-size: 0.55rem;
+  color: var(--text-muted);
+}
+
+/* Collection Grid */
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+.collection-item {
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.collection-item:hover { transform: scale(1.05); }
+.collection-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  margin: 0 auto 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.collection-item.locked .collection-icon {
+  opacity: 0.3;
+  filter: grayscale(1);
+}
+.collection-name {
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+}
+
+/* ====== DETAIL MODAL ====== */
+#detail-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: none;
+  flex-direction: column;
+  background: var(--bg-primary);
+  overflow-y: auto;
+}
+#detail-modal.active { display: flex; }
+
+.detail-header {
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  position: sticky;
+  top: 0;
+  background: var(--bg-primary);
+  z-index: 10;
+}
+
+.detail-book-visual {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.detail-open-book {
+  width: 280px;
+  height: 180px;
+  display: flex;
+  perspective: 600px;
+}
+
+.book-left, .book-right {
+  flex: 1;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+.book-left {
+  background: var(--bg-card);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-right: none;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.book-right {
+  background: var(--bg-secondary);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-left: 1px solid rgba(255,255,255,0.03);
+  justify-content: center;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.detail-title-text {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+.detail-category-emoji { font-size: 1.8rem; margin-bottom: 0.4rem; }
+.detail-rating { color: var(--accent-gold); font-size: 0.9rem; }
+
+.detail-body {
+  padding: 1.25rem 1.25rem 6rem;
+}
+.detail-section { margin-bottom: 1.5rem; }
+.detail-label {
+  font-size: 0.7rem;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+}
+.detail-review-text {
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+.detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.detail-tag {
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: rgba(200,165,92,0.1);
+  color: var(--accent-gold);
+  font-size: 0.75rem;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.action-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.08);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: var(--transition);
+}
+.action-btn:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+/* ====== SEARCH MODAL ====== */
+#search-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: none;
+  flex-direction: column;
+  background: var(--bg-primary);
+}
+#search-modal.active { display: flex; }
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.search-input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: var(--font-sans);
+  outline: none;
+}
+.search-input:focus {
+  border-color: var(--accent-gold);
+}
+
+.search-results {
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.search-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+}
+
+/* ====== BOOK INSERT ANIMATION ====== */
+.book-fly-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(26,22,18,0.85);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.book-fly-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.flying-book {
+  width: 30px;
+  height: 140px;
+  border-radius: 2px 4px 4px 2px;
+  background: var(--accent-gold);
+  box-shadow: var(--shadow-book);
+  animation: flyToShelf 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  writing-mode: vertical-rl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0,0,0,0.6);
+  font-size: 0.6rem;
+  font-weight: 600;
+}
+
+.xp-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--accent-gold);
+  color: var(--bg-primary);
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 1rem;
+  z-index: 350;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.5s ease;
+}
+.xp-toast.show {
+  opacity: 1;
+  transform: translate(-50%, -60%);
+}
+
+/* ====== ANIMATIONS ====== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes iconPop {
+  from { opacity: 0; transform: translateY(20px) scale(0.8); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes flyToShelf {
+  0% { transform: scale(1) translateY(0); opacity: 1; }
+  50% { transform: scale(0.8) translateY(-100px) rotate(5deg); opacity: 1; }
+  100% { transform: scale(0.5) translateY(-200px) rotate(0deg); opacity: 0; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* Responsive */
+@media (min-width: 500px) {
+  .category-selector { grid-template-columns: repeat(7, 1fr); }
+  .feed { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 768px) {
+  .feed { grid-template-columns: repeat(4, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ====== SPLASH SCREEN ====== -->
+<div class="screen active" id="splash" onclick="goTo('auth')">
+  <div class="splash-content">
+    <div class="splash-title">당신의 예술 서재를<br>만들어보세요</div>
+    <div class="splash-subtitle">기록하고, 수집하고, 전시하는 공간</div>
+    <div class="art-icons">
+      <div class="art-icon" title="영화">🎬</div>
+      <div class="art-icon" title="연극">🎭</div>
+      <div class="art-icon" title="회화">🎨</div>
+      <div class="art-icon" title="무용">💃</div>
+      <div class="art-icon" title="건축">🏛️</div>
+      <div class="art-icon" title="문학">📖</div>
+      <div class="art-icon" title="음악">🎵</div>
+    </div>
+    <div class="splash-cta">화면을 터치하여 시작하기</div>
+  </div>
+</div>
+
+<!-- ====== AUTH SCREEN ====== -->
+<div class="screen" id="auth">
+  <div class="auth-box">
+    <div class="auth-title">서재에 입장하기</div>
+    <div class="auth-desc">소셜 로그인 또는 이메일로 시작하세요</div>
+    <button class="social-btn" onclick="goTo('onboarding')">
+      <span>🔵</span> Google로 시작하기
+    </button>
+    <button class="social-btn" onclick="goTo('onboarding')">
+      <span>💬</span> 카카오로 시작하기
+    </button>
+    <div class="divider">또는</div>
+    <input class="input-field" type="email" placeholder="이메일 주소">
+    <input class="input-field" type="password" placeholder="비밀번호">
+    <button class="primary-btn" onclick="goTo('onboarding')">이메일로 시작하기</button>
+  </div>
+</div>
+
+<!-- ====== ONBOARDING SCREEN ====== -->
+<div class="screen" id="onboarding">
+  <div class="onboard-box">
+    <!-- Step 1 -->
+    <div class="onboard-step active" data-step="1">
+      <div class="onboard-label">Step 1 / 3</div>
+      <div class="onboard-heading">닉네임을 정해주세요</div>
+      <input class="input-field" id="nickname-input" placeholder="예: 예술먹는 하마" value="예술먹는 하마">
+      <button class="primary-btn" onclick="nextOnboardStep(2)" style="margin-top:1rem;">다음</button>
+    </div>
+    <!-- Step 2 -->
+    <div class="onboard-step" data-step="2">
+      <div class="onboard-label">Step 2 / 3</div>
+      <div class="onboard-heading">서재 이름을 지어주세요</div>
+      <input class="input-field" id="library-name-input" placeholder="예: 새벽 2시의 기록 보관소" value="새벽 2시의 기록 보관소">
+      <button class="primary-btn" onclick="nextOnboardStep(3)" style="margin-top:1rem;">다음</button>
+    </div>
+    <!-- Step 3 -->
+    <div class="onboard-step" data-step="3">
+      <div class="onboard-label">Step 3 / 3</div>
+      <div class="onboard-heading">사서 캐릭터를 선택하세요</div>
+      <div class="character-grid">
+        <div class="character-card selected" onclick="selectCharacter(this)">
+          <div class="char-emoji">🦉</div>
+          <div class="char-name">올빼미 사서</div>
+        </div>
+        <div class="character-card" onclick="selectCharacter(this)">
+          <div class="char-emoji">🐱</div>
+          <div class="char-name">고양이 사서</div>
+        </div>
+        <div class="character-card" onclick="selectCharacter(this)">
+          <div class="char-emoji">🦊</div>
+          <div class="char-name">여우 사서</div>
+        </div>
+        <div class="character-card" onclick="selectCharacter(this)">
+          <div class="char-emoji">🐻</div>
+          <div class="char-name">곰 사서</div>
+        </div>
+        <div class="character-card" onclick="selectCharacter(this)">
+          <div class="char-emoji">🐧</div>
+          <div class="char-name">펭귄 사서</div>
+        </div>
+        <div class="character-card" onclick="selectCharacter(this)">
+          <div class="char-emoji">🦔</div>
+          <div class="char-name">고슴도치 사서</div>
+        </div>
+      </div>
+      <button class="primary-btn" onclick="completeOnboarding()">서재 열기 ✨</button>
+    </div>
+    <div class="progress-dots">
+      <div class="dot active" data-dot="1"></div>
+      <div class="dot" data-dot="2"></div>
+      <div class="dot" data-dot="3"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MAIN DASHBOARD ====== -->
+<div class="screen" id="dashboard">
+  <div class="dash-header">
+    <div class="dash-user">
+      <div class="user-avatar" onclick="goTo('stats')">🦉</div>
+      <div class="user-info">
+        <div class="library-name">새벽 2시의 기록 보관소</div>
+        <div class="library-level">⭐ Lv.3 · 나무 책장</div>
+      </div>
+    </div>
+    <div class="dash-actions">
+      <button class="icon-btn" onclick="openSearch()">🔍</button>
+    </div>
+  </div>
+
+  <div class="view-tabs">
+    <button class="view-tab active" onclick="switchView('shelf', this)">📚 책장</button>
+    <button class="view-tab" onclick="switchView('list', this)">📋 리스트</button>
+    <button class="view-tab" onclick="switchView('calendar', this)">📅 캘린더</button>
+    <button class="view-tab" onclick="switchView('stack', this)">📊 쌓아보기</button>
+  </div>
+
+  <!-- Bookshelf View -->
+  <div class="bookshelf-view" id="view-shelf">
+    <div class="shelf-section">
+      <div class="shelf-label">최근 기록</div>
+      <div class="shelf-base">
+        <div class="shelf-row" id="shelf-recent"></div>
+      </div>
+    </div>
+    <div class="shelf-section">
+      <div class="shelf-label">영화</div>
+      <div class="shelf-base">
+        <div class="shelf-row" id="shelf-movie"></div>
+      </div>
+    </div>
+    <div class="shelf-section">
+      <div class="shelf-label">문학</div>
+      <div class="shelf-base">
+        <div class="shelf-row" id="shelf-literature"></div>
+      </div>
+    </div>
+    <div class="shelf-section">
+      <div class="shelf-label">음악</div>
+      <div class="shelf-base">
+        <div class="shelf-row" id="shelf-music"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- List View -->
+  <div class="list-view" id="view-list"></div>
+
+  <!-- Calendar View -->
+  <div class="calendar-view" id="view-calendar">
+    <div class="cal-header">
+      <div class="cal-month" id="cal-month-label">2026년 2월</div>
+      <div class="cal-nav">
+        <button onclick="changeMonth(-1)">◀</button>
+        <button onclick="changeMonth(1)">▶</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+
+  <!-- Stack View -->
+  <div class="stack-view" id="view-stack">
+    <div class="stacks-container" id="stacks-container"></div>
+  </div>
+</div>
+
+<!-- ====== WRITE SCREEN ====== -->
+<div class="screen" id="write">
+  <div class="write-header">
+    <button class="back-btn" onclick="goTo('dashboard')">←</button>
+    <span class="write-title-text">새 책 추가</span>
+    <span style="width:30px;"></span>
+  </div>
+  <div class="write-body">
+    <div class="write-section">
+      <div class="write-label">카테고리</div>
+      <div class="category-selector">
+        <div class="cat-btn" data-cat="영화" onclick="selectCategory(this)">
+          <span class="cat-emoji">🎬</span>
+          <span class="cat-name">영화</span>
+        </div>
+        <div class="cat-btn" data-cat="연극" onclick="selectCategory(this)">
+          <span class="cat-emoji">🎭</span>
+          <span class="cat-name">연극</span>
+        </div>
+        <div class="cat-btn" data-cat="회화" onclick="selectCategory(this)">
+          <span class="cat-emoji">🎨</span>
+          <span class="cat-name">회화</span>
+        </div>
+        <div class="cat-btn" data-cat="무용" onclick="selectCategory(this)">
+          <span class="cat-emoji">💃</span>
+          <span class="cat-name">무용</span>
+        </div>
+        <div class="cat-btn" data-cat="건축" onclick="selectCategory(this)">
+          <span class="cat-emoji">🏛️</span>
+          <span class="cat-name">건축</span>
+        </div>
+        <div class="cat-btn" data-cat="문학" onclick="selectCategory(this)">
+          <span class="cat-emoji">📖</span>
+          <span class="cat-name">문학</span>
+        </div>
+        <div class="cat-btn" data-cat="음악" onclick="selectCategory(this)">
+          <span class="cat-emoji">🎵</span>
+          <span class="cat-name">음악</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dynamic fields based on category -->
+    <div id="contextual-fields"></div>
+
+    <div class="write-section">
+      <div class="write-label">작품 정보</div>
+      <input class="write-input" id="write-title" placeholder="작품 제목" style="margin-bottom:0.75rem;">
+      <input class="write-input" id="write-date" type="date" style="margin-bottom:0.75rem;">
+    </div>
+
+    <div class="write-section">
+      <div class="write-label">별점</div>
+      <div class="star-rating" id="star-rating">
+        <span class="star" data-val="1" onclick="setRating(1)">★</span>
+        <span class="star" data-val="2" onclick="setRating(2)">★</span>
+        <span class="star" data-val="3" onclick="setRating(3)">★</span>
+        <span class="star" data-val="4" onclick="setRating(4)">★</span>
+        <span class="star" data-val="5" onclick="setRating(5)">★</span>
+      </div>
+    </div>
+
+    <div class="write-section">
+      <div class="write-label">리뷰</div>
+      <textarea class="write-textarea" id="write-review" placeholder="이 작품에 대한 나의 기록을 남겨보세요..."></textarea>
+    </div>
+
+    <div class="write-section">
+      <div class="write-label">책등 꾸미기</div>
+      <div class="color-picker-row" id="color-picker"></div>
+      <div class="pattern-row" id="pattern-picker"></div>
+    </div>
+
+    <!-- Ticket Upload (for 영화/연극/회화) -->
+    <div class="write-section ticket-upload" id="ticket-upload-section">
+      <div class="write-label">🎫 티켓 아카이빙</div>
+      <div class="ticket-drop" onclick="document.getElementById('ticket-file').click()">
+        📸 티켓 사진을 올려보세요<br><small>책갈피처럼 책 사이에 끼워드려요</small>
+      </div>
+      <input type="file" id="ticket-file" accept="image/*" style="display:none;">
+    </div>
+
+    <div class="write-section">
+      <div class="write-label">태그</div>
+      <div class="tag-input-wrapper" id="tag-wrapper">
+        <input class="tag-input" id="tag-input" placeholder="#인생작 #우울할때" onkeydown="handleTag(event)">
+      </div>
+    </div>
+
+    <div class="write-section">
+      <div class="toggle-row">
+        <span class="toggle-label">🔒 비공개 (나만 보기)</span>
+        <div class="toggle" id="private-toggle" onclick="this.classList.toggle('on')"></div>
+      </div>
+    </div>
+
+    <button class="submit-btn" onclick="submitBook()">📚 책장에 꽂기</button>
+  </div>
+</div>
+
+<!-- ====== COMMUNITY SCREEN ====== -->
+<div class="screen" id="community">
+  <div class="community-header">
+    <div class="community-title">🔭 광장</div>
+    <div class="filter-row">
+      <button class="filter-chip active" onclick="selectFilter(this)">최신순</button>
+      <button class="filter-chip" onclick="selectFilter(this)">인기순</button>
+      <button class="filter-chip" onclick="selectFilter(this)">팔로잉</button>
+      <button class="filter-chip" onclick="selectFilter(this)">🎬 영화</button>
+      <button class="filter-chip" onclick="selectFilter(this)">🎭 연극</button>
+      <button class="filter-chip" onclick="selectFilter(this)">🎨 회화</button>
+      <button class="filter-chip" onclick="selectFilter(this)">📖 문학</button>
+      <button class="filter-chip" onclick="selectFilter(this)">🎵 음악</button>
+    </div>
+  </div>
+  <div class="feed" id="community-feed"></div>
+</div>
+
+<!-- ====== STATS SCREEN ====== -->
+<div class="screen" id="stats">
+  <div class="stats-header">
+    <button class="back-btn" onclick="goTo('dashboard')" style="position:absolute;left:1.25rem;">←</button>
+    <div class="stats-title">📊 나의 예술 통계</div>
+  </div>
+  <div class="stats-body">
+    <div class="stats-card">
+      <div class="stats-card-title">예술 성향 레이더</div>
+      <div class="radar-container">
+        <svg class="radar-svg" viewBox="0 0 300 300" id="radar-chart"></svg>
+      </div>
+    </div>
+    <div class="stats-card">
+      <div class="stats-card-title">월별 기록 추이</div>
+      <div class="monthly-chart" id="monthly-chart"></div>
+    </div>
+    <div class="stats-card">
+      <div class="stats-card-title">사서 도감</div>
+      <div class="collection-grid" id="collection-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== DETAIL MODAL ====== -->
+<div id="detail-modal">
+  <div class="detail-header">
+    <button class="back-btn" onclick="closeDetail()">←</button>
+    <span class="write-title-text">리뷰 상세</span>
+    <span style="width:30px;"></span>
+  </div>
+  <div class="detail-book-visual" id="detail-visual"></div>
+  <div class="detail-body" id="detail-body"></div>
+</div>
+
+<!-- ====== SEARCH MODAL ====== -->
+<div id="search-modal">
+  <div class="search-bar">
+    <button class="back-btn" onclick="closeSearch()">←</button>
+    <input class="search-input" id="search-input" placeholder="작품명, 태그로 검색..." oninput="handleSearch()">
+  </div>
+  <div class="search-results" id="search-results">
+    <div class="search-empty">🔍 서재에서 기록을 찾아보세요</div>
+  </div>
+</div>
+
+<!-- ====== BOOK FLY ANIMATION ====== -->
+<div class="book-fly-overlay" id="book-fly-overlay">
+  <div class="flying-book" id="flying-book"></div>
+</div>
+<div class="xp-toast" id="xp-toast">+30 XP ✨</div>
+
+<!-- ====== BOTTOM NAV ====== -->
+<div class="bottom-nav" id="bottom-nav" style="display:none;">
+  <button class="nav-item active" onclick="navTo('dashboard', this)">
+    <span class="nav-icon">📚</span>
+    <span class="nav-label">서재</span>
+  </button>
+  <button class="nav-item" onclick="navTo('community', this)">
+    <span class="nav-icon">🔭</span>
+    <span class="nav-label">탐색</span>
+  </button>
+  <button class="nav-add" onclick="goTo('write')">+</button>
+  <button class="nav-item" onclick="navTo('stats', this)">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">통계</span>
+  </button>
+  <button class="nav-item" onclick="openSearch()">
+    <span class="nav-icon">🔍</span>
+    <span class="nav-label">검색</span>
+  </button>
+</div>
+
+<script>
+// ========== STATE ==========
+let state = {
+  nickname: '예술먹는 하마',
+  libraryName: '새벽 2시의 기록 보관소',
+  character: '🦉',
+  level: 3,
+  xp: 280,
+  currentRating: 0,
+  selectedCategory: '',
+  selectedColor: '#c8a55c',
+  selectedPattern: 'none',
+  tags: [],
+  calMonth: 1, // 0-indexed
+  calYear: 2026,
+  books: []
+};
+
+// Sample books data
+const sampleBooks = [
+  { id: 1, title: '인사이드 아웃 2', category: '영화', emoji: '🎬', color: '#5a7a9a', rating: 4.5, review: '감정의 복잡성을 이렇게 아름답게 표현할 수 있다니. 불안이라는 감정이 나쁜 것만은 아니라는 메시지가 인상적이었다.', tags: ['#인생작', '#감동'], date: '2026-01-15', thickness: 28, pattern: 'none' },
+  { id: 2, title: '작은 아씨들', category: '문학', emoji: '📖', color: '#b5606a', rating: 4.0, review: '조 마치의 독립적인 정신이 21세기에도 여전히 빛난다. 시대를 초월한 이야기.', tags: ['#클래식', '#페미니즘'], date: '2026-01-20', thickness: 34, pattern: 'lines' },
+  { id: 3, title: '라 라 랜드', category: '영화', emoji: '🎬', color: '#c8a55c', rating: 5.0, review: '꿈과 사랑 사이의 선택. 마지막 장면에서 흘린 눈물은 아직도 기억난다.', tags: ['#인생작', '#우울할때'], date: '2026-01-25', thickness: 26, pattern: 'dots' },
+  { id: 4, title: '빈센트 반 고흐 전시', category: '회화', emoji: '🎨', color: '#d4764e', rating: 4.5, review: '별이 빛나는 밤을 실물로 보는 감동. 붓터치 하나하나에 담긴 열정이 느껴졌다.', tags: ['#전시', '#감동'], date: '2026-02-01', thickness: 22, pattern: 'brush' },
+  { id: 5, title: '비틀즈 - Abbey Road', category: '음악', emoji: '🎵', color: '#6a8a6a', rating: 5.0, review: '음악의 완벽한 형태. Come Together부터 마지막 메들리까지 한 순간도 놓칠 수 없다.', tags: ['#명반', '#클래식'], date: '2026-02-03', thickness: 20, pattern: 'notes' },
+  { id: 6, title: '햄릿', category: '연극', emoji: '🎭', color: '#7a6a9a', rating: 4.0, review: '존재와 비존재 사이에서 방황하는 인간의 본질을 무대 위에서 체험했다.', tags: ['#셰익스피어', '#명작'], date: '2026-02-05', thickness: 30, pattern: 'none' },
+  { id: 7, title: '노르웨이의 숲', category: '문학', emoji: '📖', color: '#5a8a8a', rating: 3.5, review: '무라카미의 문체는 여전히 매력적이지만, 이번엔 조금 멀리서 바라보게 되었다.', tags: ['#일본문학', '#재독'], date: '2026-01-10', thickness: 32, pattern: 'lines' },
+  { id: 8, title: '가우디 성가족 성당', category: '건축', emoji: '🏛️', color: '#d4764e', rating: 5.0, review: '인간이 만든 것 중 가장 신에 가까운 공간. 빛이 스테인드글라스를 통과하는 순간 시간이 멈췄다.', tags: ['#바르셀로나', '#인생건축'], date: '2025-12-20', thickness: 26, pattern: 'none' },
+  { id: 9, title: '호두까기 인형', category: '무용', emoji: '💃', color: '#b5606a', rating: 4.0, review: '차이코프스키의 선율에 맞춰 펼쳐지는 꿈의 세계. 겨울에 꼭 봐야 할 공연.', tags: ['#발레', '#겨울'], date: '2025-12-25', thickness: 24, pattern: 'none' },
+  { id: 10, title: '듄: 파트 2', category: '영화', emoji: '🎬', color: '#c8a55c', rating: 4.5, review: '스케일이 다른 SF 서사시. 한스 짐머의 음악과 빌뇌브의 연출이 완벽한 조화.', tags: ['#SF', '#극장필수'], date: '2026-01-30', thickness: 28, pattern: 'dots' },
+  { id: 11, title: '쇼팽 녹턴 전곡', category: '음악', emoji: '🎵', color: '#5a7a9a', rating: 4.5, review: '새벽 2시에 듣는 쇼팽은 마법과도 같다. 특히 Op.9 No.2는 영원히 사랑할 곡.', tags: ['#클래식', '#새벽감성'], date: '2026-02-06', thickness: 22, pattern: 'notes' },
+  { id: 12, title: '데미안', category: '문학', emoji: '📖', color: '#7a6a9a', rating: 4.0, review: '새는 알에서 나오려고 투쟁한다. 20대에 다시 읽으니 또 다른 울림이 있다.', tags: ['#헤세', '#성장'], date: '2026-01-05', thickness: 26, pattern: 'lines' },
+];
+
+state.books = [...sampleBooks];
+
+const SPINE_COLORS = ['#c8a55c','#d4764e','#b5606a','#5a7a9a','#6a8a6a','#7a6a9a','#5a8a8a','#8a6a5a','#9a7a5a','#6a5a8a'];
+const PATTERNS = [
+  { id: 'none', name: '없음' },
+  { id: 'lines', name: '줄무늬' },
+  { id: 'dots', name: '점무늬' },
+  { id: 'brush', name: '붓터치' },
+  { id: 'notes', name: '음표' },
+  { id: 'diamond', name: '다이아몬드' },
+];
+
+const CATEGORIES = [
+  { name: '영화', emoji: '🎬', color: '#5a7a9a' },
+  { name: '연극', emoji: '🎭', color: '#7a6a9a' },
+  { name: '회화', emoji: '🎨', color: '#d4764e' },
+  { name: '무용', emoji: '💃', color: '#b5606a' },
+  { name: '건축', emoji: '🏛️', color: '#8a6a5a' },
+  { name: '문학', emoji: '📖', color: '#5a8a8a' },
+  { name: '음악', emoji: '🎵', color: '#6a8a6a' },
+];
+
+// Community sample
+const communityPosts = [
+  { user: '밤하늘의 영화관', title: '위플래쉬', category: '영화', emoji: '🎬', color: '#d4764e', rating: 5, excerpt: '드럼 소리가 아직도 귓가에 맴돈다. 완벽을 향한 집착의 끝은 어디인가.', likes: 47 },
+  { user: '책벌레 다람쥐', title: '1984', category: '문학', emoji: '📖', color: '#5a7a9a', rating: 4.5, excerpt: '오웰의 예언이 현실이 되어가는 느낌. 빅 브라더가 지켜보고 있다.', likes: 32 },
+  { user: '음표 수집가', title: '드뷔시 달빛', category: '음악', emoji: '🎵', color: '#7a6a9a', rating: 5, excerpt: '피아노의 음색이 달빛처럼 부드럽게 흐른다. 밤에 꼭 들어야 할 곡.', likes: 28 },
+  { user: '그림 읽는 여자', title: '모네 수련 전시', category: '회화', emoji: '🎨', color: '#6a8a6a', rating: 4, excerpt: '물 위에 떠있는 듯한 몽환적인 색감. 실물의 크기에 압도되었다.', likes: 55 },
+  { user: '무대 위의 철학자', title: '고도를 기다리며', category: '연극', emoji: '🎭', color: '#b5606a', rating: 4.5, excerpt: '기다림의 본질에 대해 다시 생각하게 된 작품. 공허함 속의 아름다움.', likes: 19 },
+  { user: '건축 산책자', title: '안도 타다오 빛의 교회', category: '건축', emoji: '🏛️', color: '#c8a55c', rating: 5, excerpt: '콘크리트 벽 사이로 들어오는 십자가 모양의 빛. 건축이 예술이 되는 순간.', likes: 41 },
+  { user: '춤추는 별', title: '지젤', category: '무용', emoji: '💃', color: '#5a8a8a', rating: 4, excerpt: '2막의 윌리 군무가 압도적. 클래식 발레의 진수를 보여준 무대.', likes: 23 },
+  { user: '시네필 고양이', title: '봄날은 간다', category: '영화', emoji: '🎬', color: '#5a7a9a', rating: 4.5, excerpt: '사랑이 떠나가는 과정을 이토록 담담하게 그려낸 허진호 감독의 걸작.', likes: 38 },
+];
+
+// ========== NAVIGATION ==========
+function goTo(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  
+  const showNav = ['dashboard', 'community', 'stats', 'write'].includes(screenId);
+  document.getElementById('bottom-nav').style.display = showNav ? 'flex' : 'none';
+  
+  if (screenId === 'dashboard') renderDashboard();
+  if (screenId === 'community') renderCommunity();
+  if (screenId === 'stats') renderStats();
+  if (screenId === 'write') initWriteScreen();
+}
+
+function navTo(screenId, el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  goTo(screenId);
+}
+
+// ========== ONBOARDING ==========
+function nextOnboardStep(step) {
+  if (step === 2) state.nickname = document.getElementById('nickname-input').value || '예술먹는 하마';
+  if (step === 3) state.libraryName = document.getElementById('library-name-input').value || '새벽 2시의 기록 보관소';
+  
+  document.querySelectorAll('.onboard-step').forEach(s => s.classList.remove('active'));
+  document.querySelector(`.onboard-step[data-step="${step}"]`).classList.add('active');
+  document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+  document.querySelector(`.dot[data-dot="${step}"]`).classList.add('active');
+}
+
+function selectCharacter(el) {
+  document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.character = el.querySelector('.char-emoji').textContent;
+}
+
+function completeOnboarding() {
+  document.querySelector('.user-avatar').textContent = state.character;
+  document.querySelector('.library-name').textContent = state.libraryName;
+  goTo('dashboard');
+}
+
+// ========== DASHBOARD ==========
+function renderDashboard() {
+  renderShelf();
+  renderListView();
+  renderCalendar();
+  renderStackView();
+}
+
+function getPatternSVG(pattern, color) {
+  const lighter = color + '40';
+  switch(pattern) {
+    case 'lines': return `<svg width="100%" height="100%"><defs><pattern id="p-lines" width="6" height="6" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="6" stroke="${lighter}" stroke-width="1"/></pattern></defs><rect fill="url(#p-lines)" width="100%" height="100%"/></svg>`;
+    case 'dots': return `<svg width="100%" height="100%"><defs><pattern id="p-dots" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.5" fill="${lighter}"/></pattern></defs><rect fill="url(#p-dots)" width="100%" height="100%"/></svg>`;
+    case 'brush': return `<svg width="100%" height="100%"><defs><pattern id="p-brush" width="12" height="12" patternUnits="userSpaceOnUse"><path d="M0 6Q3 2 6 6T12 6" fill="none" stroke="${lighter}" stroke-width="1.5"/></pattern></defs><rect fill="url(#p-brush)" width="100%" height="100%"/></svg>`;
+    case 'notes': return `<svg width="100%" height="100%"><defs><pattern id="p-notes" width="14" height="14" patternUnits="userSpaceOnUse"><text x="2" y="11" font-size="8" fill="${lighter}">♪</text></pattern></defs><rect fill="url(#p-notes)" width="100%" height="100%"/></svg>`;
+    case 'diamond': return `<svg width="100%" height="100%"><defs><pattern id="p-diamond" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M5 0L10 5L5 10L0 5Z" fill="none" stroke="${lighter}" stroke-width="0.8"/></pattern></defs><rect fill="url(#p-diamond)" width="100%" height="100%"/></svg>`;
+    default: return '';
+  }
+}
+
+function createSpineEl(book) {
+  const spine = document.createElement('div');
+  spine.className = 'book-spine';
+  spine.style.width = book.thickness + 'px';
+  spine.style.height = (100 + Math.random() * 50) + 'px';
+  spine.style.background = book.color;
+  spine.textContent = book.title;
+  spine.onclick = () => openDetail(book);
+  
+  if (book.pattern && book.pattern !== 'none') {
+    const patternDiv = document.createElement('div');
+    patternDiv.className = 'spine-pattern';
+    patternDiv.innerHTML = getPatternSVG(book.pattern, book.color);
+    spine.appendChild(patternDiv);
+  }
+  return spine;
+}
+
+function renderShelf() {
+  const recent = document.getElementById('shelf-recent');
+  const movie = document.getElementById('shelf-movie');
+  const literature = document.getElementById('shelf-literature');
+  const music = document.getElementById('shelf-music');
+  
+  [recent, movie, literature, music].forEach(el => el.innerHTML = '');
+  
+  const sorted = [...state.books].sort((a,b) => new Date(b.date) - new Date(a.date));
+  sorted.slice(0, 8).forEach(b => recent.appendChild(createSpineEl(b)));
+  state.books.filter(b => b.category === '영화').forEach(b => movie.appendChild(createSpineEl(b)));
+  state.books.filter(b => b.category === '문학').forEach(b => literature.appendChild(createSpineEl(b)));
+  state.books.filter(b => b.category === '음악').forEach(b => music.appendChild(createSpineEl(b)));
+}
+
+function renderListView() {
+  const container = document.getElementById('view-list');
+  container.innerHTML = '';
+  const sorted = [...state.books].sort((a,b) => new Date(b.date) - new Date(a.date));
+  sorted.forEach(book => {
+    const item = document.createElement('div');
+    item.className = 'list-item';
+    item.onclick = () => openDetail(book);
+    item.innerHTML = `
+      <div class="list-color-bar" style="background:${book.color}"></div>
+      <div class="list-info">
+        <div class="list-title">${book.emoji} ${book.title}</div>
+        <div class="list-meta">${book.category} · ${book.date}</div>
+      </div>
+      <div class="list-rating">${'★'.repeat(Math.floor(book.rating))}${'☆'.repeat(5-Math.floor(book.rating))}</div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function renderCalendar() {
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+  const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('cal-month-label').textContent = `${state.calYear}년 ${monthNames[state.calMonth]}`;
+  
+  const dayNames = ['일','월','화','수','목','금','토'];
+  dayNames.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-name';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+  
+  const firstDay = new Date(state.calYear, state.calMonth, 1).getDay();
+  const daysInMonth = new Date(state.calYear, state.calMonth + 1, 0).getDate();
+  
+  for (let i = 0; i < firstDay; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'cal-day empty';
+    grid.appendChild(empty);
+  }
+  
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${state.calYear}-${String(state.calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasEntry = state.books.some(b => b.date === dateStr);
+    const el = document.createElement('div');
+    el.className = 'cal-day' + (hasEntry ? ' has-entry' : '');
+    el.textContent = d;
+    if (hasEntry) {
+      const booksOnDay = state.books.filter(b => b.date === dateStr);
+      el.onclick = () => openDetail(booksOnDay[0]);
+    }
+    grid.appendChild(el);
+  }
+}
+
+function changeMonth(dir) {
+  state.calMonth += dir;
+  if (state.calMonth > 11) { state.calMonth = 0; state.calYear++; }
+  if (state.calMonth < 0) { state.calMonth = 11; state.calYear--; }
+  renderCalendar();
+}
+
+function renderStackView() {
+  const container = document.getElementById('stacks-container');
+  container.innerHTML = '';
+  
+  CATEGORIES.forEach(cat => {
+    const books = state.books.filter(b => b.category === cat.name);
+    const col = document.createElement('div');
+    col.className = 'stack-col';
+    
+    books.forEach(b => {
+      const block = document.createElement('div');
+      block.className = 'stack-book';
+      block.style.background = b.color;
+      block.style.height = '10px';
+      block.onclick = () => openDetail(b);
+      col.appendChild(block);
+    });
+    
+    const label = document.createElement('div');
+    label.innerHTML = `<div class="stack-count">${books.length}</div><div class="stack-label">${cat.emoji}<br>${cat.name}</div>`;
+    col.appendChild(label);
+    container.appendChild(col);
+  });
+}
+
+function switchView(view, tabEl) {
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  if (tabEl) tabEl.classList.add('active');
+  
+  ['shelf','list','calendar','stack'].forEach(v => {
+    const el = document.getElementById('view-' + v);
+    if (el) el.style.display = (v === view) ? (v === 'list' || v === 'stack' || v === 'calendar' ? 'block' : '') : 'none';
+  });
+  
+  if (view === 'shelf') {
+    document.querySelector('.bookshelf-view').style.display = '';
+    document.getElementById('view-list').style.display = 'none';
+    document.getElementById('view-calendar').style.display = 'none';
+    document.getElementById('view-stack').style.display = 'none';
+  } else if (view === 'list') {
+    document.querySelector('.bookshelf-view').style.display = 'none';
+    document.getElementById('view-list').style.display = 'block';
+    document.getElementById('view-calendar').style.display = 'none';
+    document.getElementById('view-stack').style.display = 'none';
+  } else if (view === 'calendar') {
+    document.querySelector('.bookshelf-view').style.display = 'none';
+    document.getElementById('view-list').style.display = 'none';
+    document.getElementById('view-calendar').style.display = 'block';
+    document.getElementById('view-stack').style.display = 'none';
+  } else if (view === 'stack') {
+    document.querySelector('.bookshelf-view').style.display = 'none';
+    document.getElementById('view-list').style.display = 'none';
+    document.getElementById('view-calendar').style.display = 'none';
+    document.getElementById('view-stack').style.display = 'block';
+  }
+}
+
+// ========== WRITE ==========
+function initWriteScreen() {
+  state.selectedCategory = '';
+  state.currentRating = 0;
+  state.tags = [];
+  state.selectedColor = '#c8a55c';
+  state.selectedPattern = 'none';
+  
+  document.getElementById('write-title').value = '';
+  document.getElementById('write-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('write-review').value = '';
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
+  document.getElementById('contextual-fields').innerHTML = '';
+  document.getElementById('tag-wrapper').innerHTML = '<input class="tag-input" id="tag-input" placeholder="#인생작 #우울할때" onkeydown="handleTag(event)">';
+  document.getElementById('ticket-upload-section').classList.remove('visible');
+  
+  // Color picker
+  const colorPicker = document.getElementById('color-picker');
+  colorPicker.innerHTML = '';
+  SPINE_COLORS.forEach((c, i) => {
+    const swatch = document.createElement('div');
+    swatch.className = 'color-swatch' + (i === 0 ? ' selected' : '');
+    swatch.style.background = c;
+    swatch.onclick = () => {
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+      swatch.classList.add('selected');
+      state.selectedColor = c;
+    };
+    colorPicker.appendChild(swatch);
+  });
+  
+  // Pattern picker
+  const patternPicker = document.getElementById('pattern-picker');
+  patternPicker.innerHTML = '';
+  PATTERNS.forEach((p, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'pattern-chip' + (i === 0 ? ' selected' : '');
+    chip.textContent = p.name;
+    chip.onclick = () => {
+      document.querySelectorAll('.pattern-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      state.selectedPattern = p.id;
+    };
+    patternPicker.appendChild(chip);
+  });
+}
+
+function selectCategory(el) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  state.selectedCategory = el.dataset.cat;
+  
+  // Show ticket upload for applicable categories
+  const ticketCats = ['영화', '연극', '회화'];
+  const ticketSection = document.getElementById('ticket-upload-section');
+  ticketSection.classList.toggle('visible', ticketCats.includes(state.selectedCategory));
+  
+  // Contextual fields
+  const ctx = document.getElementById('contextual-fields');
+  ctx.innerHTML = '';
+  
+  const fields = {
+    '음악': '<div class="write-section"><div class="write-label">🎵 이 곡을 듣기 좋은 시간대</div><input class="write-input" placeholder="예: 새벽 2시, 비 오는 오후"></div>',
+    '건축': '<div class="write-section"><div class="write-label">🏛️ 방문 장소</div><input class="write-input" placeholder="예: 서울 DDP"></div><div class="write-section"><div class="write-label">공간의 분위기</div><input class="write-input" placeholder="예: 미래적인, 차가운, 압도적인"></div>',
+    '회화': '<div class="write-section"><div class="write-label">🎨 전시회 이름</div><input class="write-input" placeholder="예: 반 고흐 몰입형 전시"></div><div class="write-section"><div class="write-label">가장 오래 머문 그림</div><input class="write-input" placeholder="예: 별이 빛나는 밤"></div>',
+  };
+  
+  if (fields[state.selectedCategory]) {
+    ctx.innerHTML = fields[state.selectedCategory];
+  }
+}
+
+function setRating(val) {
+  state.currentRating = val;
+  document.querySelectorAll('.star').forEach(s => {
+    s.classList.toggle('active', parseInt(s.dataset.val) <= val);
+  });
+}
+
+function handleTag(e) {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    const input = document.getElementById('tag-input');
+    let tag = input.value.trim();
+    if (!tag) return;
+    if (!tag.startsWith('#')) tag = '#' + tag;
+    
+    state.tags.push(tag);
+    const chip = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.innerHTML = `${tag} <span class="tag-remove" onclick="removeTag(this, '${tag}')">×</span>`;
+    document.getElementById('tag-wrapper').insertBefore(chip, input);
+    input.value = '';
+  }
+}
+
+function removeTag(el, tag) {
+  state.tags = state.tags.filter(t => t !== tag);
+  el.parentElement.remove();
+}
+
+function submitBook() {
+  const title = document.getElementById('write-title').value || '무제';
+  const date = document.getElementById('write-date').value;
+  const review = document.getElementById('write-review').value;
+  
+  const catObj = CATEGORIES.find(c => c.name === state.selectedCategory) || CATEGORIES[0];
+  const reviewLen = review.length;
+  const thickness = Math.max(16, Math.min(40, 16 + Math.floor(reviewLen / 20)));
+  
+  const newBook = {
+    id: Date.now(),
+    title,
+    category: catObj.name,
+    emoji: catObj.emoji,
+    color: state.selectedColor,
+    rating: state.currentRating,
+    review,
+    tags: [...state.tags],
+    date,
+    thickness,
+    pattern: state.selectedPattern,
+  };
+  
+  state.books.push(newBook);
+  
+  // Animation
+  const overlay = document.getElementById('book-fly-overlay');
+  const flyBook = document.getElementById('flying-book');
+  flyBook.style.background = state.selectedColor;
+  flyBook.textContent = title;
+  overlay.classList.add('active');
+  
+  setTimeout(() => {
+    overlay.classList.remove('active');
+    const toast = document.getElementById('xp-toast');
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+      goTo('dashboard');
+    }, 1200);
+  }, 1300);
+}
+
+// ========== COMMUNITY ==========
+function renderCommunity() {
+  const feed = document.getElementById('community-feed');
+  feed.innerHTML = '';
+  
+  communityPosts.forEach(post => {
+    const card = document.createElement('div');
+    card.className = 'feed-card';
+    card.onclick = () => openCommunityDetail(post);
+    card.innerHTML = `
+      <div class="feed-cover" style="background:${post.color}">
+        <span style="position:relative;z-index:1;">${post.emoji}</span>
+      </div>
+      <div class="feed-info">
+        <div class="feed-work-title">${post.title}</div>
+        <div class="feed-author">by ${post.user}</div>
+        <div class="feed-excerpt">${post.excerpt}</div>
+      </div>
+      <div class="feed-footer">
+        <div class="feed-stars">${'★'.repeat(Math.floor(post.rating))}</div>
+        <div class="feed-likes">♥ ${post.likes}</div>
+      </div>
+    `;
+    feed.appendChild(card);
+  });
+}
+
+function selectFilter(el) {
+  document.querySelectorAll('.filter-chip').forEach(f => f.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ========== DETAIL ==========
+function openDetail(book) {
+  const modal = document.getElementById('detail-modal');
+  modal.classList.add('active');
+  
+  document.getElementById('detail-visual').innerHTML = `
+    <div class="detail-open-book">
+      <div class="book-left" style="border-left: 6px solid ${book.color};">
+        <div class="detail-category-emoji">${book.emoji}</div>
+        <div class="detail-title-text">${book.title}</div>
+        <div class="detail-rating">${'★'.repeat(Math.floor(book.rating))} ${book.rating}</div>
+      </div>
+      <div class="book-right">${book.review.substring(0, 100)}${book.review.length > 100 ? '...' : ''}</div>
+    </div>
+  `;
+  
+  document.getElementById('detail-body').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-label">리뷰</div>
+      <div class="detail-review-text">${book.review}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label">정보</div>
+      <div class="detail-review-text">${book.category} · ${book.date}</div>
+    </div>
+    ${book.tags && book.tags.length ? `
+    <div class="detail-section">
+      <div class="detail-label">태그</div>
+      <div class="detail-tags">${book.tags.map(t => `<span class="detail-tag">${t}</span>`).join('')}</div>
+    </div>` : ''}
+    <div class="detail-actions">
+      <button class="action-btn" onclick="alert('❤️ 좋아요!')">♥ 좋아요</button>
+      <button class="action-btn" onclick="alert('📋 스크랩 완료!')">📋 스크랩</button>
+      <button class="action-btn" onclick="alert('💬 댓글')">💬 댓글</button>
+    </div>
+  `;
+}
+
+function openCommunityDetail(post) {
+  openDetail({
+    ...post,
+    review: post.excerpt,
+    date: '2026-02',
+    tags: [],
+  });
+}
+
+function closeDetail() {
+  document.getElementById('detail-modal').classList.remove('active');
+}
+
+// ========== SEARCH ==========
+function openSearch() {
+  document.getElementById('search-modal').classList.add('active');
+  setTimeout(() => document.getElementById('search-input').focus(), 100);
+}
+
+function closeSearch() {
+  document.getElementById('search-modal').classList.remove('active');
+  document.getElementById('search-input').value = '';
+}
+
+function handleSearch() {
+  const query = document.getElementById('search-input').value.toLowerCase().trim();
+  const results = document.getElementById('search-results');
+  
+  if (!query) {
+    results.innerHTML = '<div class="search-empty">🔍 서재에서 기록을 찾아보세요</div>';
+    return;
+  }
+  
+  const matched = state.books.filter(b => 
+    b.title.toLowerCase().includes(query) ||
+    b.category.includes(query) ||
+    b.tags.some(t => t.toLowerCase().includes(query)) ||
+    b.review.toLowerCase().includes(query)
+  );
+  
+  if (!matched.length) {
+    results.innerHTML = '<div class="search-empty">검색 결과가 없습니다 😢</div>';
+    return;
+  }
+  
+  results.innerHTML = '';
+  matched.forEach(book => {
+    const item = document.createElement('div');
+    item.className = 'list-item';
+    item.onclick = () => { closeSearch(); openDetail(book); };
+    item.innerHTML = `
+      <div class="list-color-bar" style="background:${book.color}"></div>
+      <div class="list-info">
+        <div class="list-title">${book.emoji} ${book.title}</div>
+        <div class="list-meta">${book.category} · ${book.date}</div>
+      </div>
+      <div class="list-rating">${'★'.repeat(Math.floor(book.rating))}</div>
+    `;
+    results.appendChild(item);
+  });
+}
+
+// ========== STATS ==========
+function renderStats() {
+  renderRadar();
+  renderMonthlyChart();
+  renderCollection();
+}
+
+function renderRadar() {
+  const svg = document.getElementById('radar-chart');
+  const cx = 150, cy = 150, r = 100;
+  const cats = CATEGORIES;
+  const angles = cats.map((_, i) => (Math.PI * 2 * i / cats.length) - Math.PI / 2);
+  
+  const counts = cats.map(c => state.books.filter(b => b.category === c.name).length);
+  const maxCount = Math.max(...counts, 1);
+  
+  let html = '';
+  
+  // Grid circles
+  [0.25, 0.5, 0.75, 1].forEach(scale => {
+    const points = angles.map(a => `${cx + r * scale * Math.cos(a)},${cy + r * scale * Math.sin(a)}`).join(' ');
+    html += `<polygon points="${points}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+  });
+  
+  // Axis lines
+  angles.forEach(a => {
+    html += `<line x1="${cx}" y1="${cy}" x2="${cx + r * Math.cos(a)}" y2="${cy + r * Math.sin(a)}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+  });
+  
+  // Data polygon
+  const dataPoints = counts.map((c, i) => {
+    const scale = c / maxCount;
+    return `${cx + r * scale * Math.cos(angles[i])},${cy + r * scale * Math.sin(angles[i])}`;
+  }).join(' ');
+  html += `<polygon points="${dataPoints}" fill="rgba(200,165,92,0.15)" stroke="var(--accent-gold)" stroke-width="2"/>`;
+  
+  // Data dots + labels
+  counts.forEach((c, i) => {
+    const scale = c / maxCount;
+    const x = cx + r * scale * Math.cos(angles[i]);
+    const y = cy + r * scale * Math.sin(angles[i]);
+    html += `<circle cx="${x}" cy="${y}" r="4" fill="var(--accent-gold)"/>`;
+    
+    const lx = cx + (r + 25) * Math.cos(angles[i]);
+    const ly = cy + (r + 25) * Math.sin(angles[i]);
+    html += `<text x="${lx}" y="${ly}" fill="var(--text-secondary)" font-size="11" text-anchor="middle" dominant-baseline="middle">${cats[i].emoji} ${c}</text>`;
+  });
+  
+  svg.innerHTML = html;
+}
+
+function renderMonthlyChart() {
+  const container = document.getElementById('monthly-chart');
+  container.innerHTML = '';
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const monthlyCounts = months.map((_, i) => {
+    const m = String(i + 1).padStart(2, '0');
+    return state.books.filter(b => b.date.includes(`-${m}-`)).length;
+  });
+  const maxM = Math.max(...monthlyCounts, 1);
+  
+  months.forEach((label, i) => {
+    const col = document.createElement('div');
+    col.className = 'month-bar';
+    const height = Math.max(4, (monthlyCounts[i] / maxM) * 100);
+    col.innerHTML = `<div class="bar" style="height:${height}px;"></div><div class="month-label">${label}</div>`;
+    container.appendChild(col);
+  });
+}
+
+function renderCollection() {
+  const grid = document.getElementById('collection-grid');
+  grid.innerHTML = '';
+  
+  const skins = [
+    { emoji: '🦉', name: '올빼미', unlocked: true },
+    { emoji: '🐱', name: '고양이', unlocked: true },
+    { emoji: '🦊', name: '여우', unlocked: true },
+    { emoji: '🐻', name: '곰', unlocked: false },
+    { emoji: '🐧', name: '펭귄', unlocked: false },
+    { emoji: '🦔', name: '고슴도치', unlocked: false },
+    { emoji: '🦋', name: '나비', unlocked: false },
+    { emoji: '🐉', name: '용', unlocked: false },
+  ];
+  
+  skins.forEach(skin => {
+    const item = document.createElement('div');
+    item.className = 'collection-item' + (skin.unlocked ? '' : ' locked');
+    item.innerHTML = `
+      <div class="collection-icon" style="background:${skin.unlocked ? 'var(--bg-card)' : 'rgba(255,255,255,0.02)'};">${skin.emoji}</div>
+      <div class="collection-name">${skin.unlocked ? skin.name : '???'}</div>
+    `;
+    grid.appendChild(item);
+  });
+}
+
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded', () => {
+  // Set today's date
+  const dateInput = document.getElementById('write-date');
+  if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+});
+</script>
+</body>
+</html>
